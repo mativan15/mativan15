@@ -2,9 +2,9 @@
 
 # Iván Sardon
 
-### Computer Science Student • Software Engineer • Systems, Web & Mobile Development
+### Computer Science Student • Software Engineer • Systems, Networking, Web & Mobile Development
 
-Building scalable applications, database systems and real-world software solutions.
+Building scalable applications, low-level systems and real-world software solutions.
 
 <p align="center">
   <a href="https://github.com/mativan15">
@@ -12,8 +12,8 @@ Building scalable applications, database systems and real-world software solutio
   </a>
   <img src="https://img.shields.io/badge/C%2B%2B-Systems%20Programming-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/TypeScript-Web%20Development-3178C6?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Networking-TCP%2FUNIX-darkgreen?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Flutter-Mobile%20Development-02569B?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Firebase-Backend-orange?style=for-the-badge" />
 </p>
 
 <p align="center">
@@ -31,17 +31,17 @@ Building scalable applications, database systems and real-world software solutio
 
 # About Me
 
-Computer Science student at Universidad Católica San Pablo with strong interest in:
+Computer Science student at Universidad Católica San Pablo focused on:
 
 - Database systems
 - Software engineering
-- Web development
-- Mobile development
+- Networking and UNIX tools
+- Web and mobile development
 - Low-level data structures
-- AI-assisted applications
 - Backend architecture
+- AI-assisted applications
 
-I enjoy building technically challenging projects that combine engineering depth with practical real-world usage.
+I enjoy building technically challenging projects that combine engineering depth, performance and practical real-world usage.
 
 ---
 
@@ -50,7 +50,7 @@ I enjoy building technically challenging projects that combine engineering depth
 ## Languages
 
 <p>
-  <img src="https://skillicons.dev/icons?i=cpp,ts,js,dart,swift,python,java,mysql" />
+  <img src="https://skillicons.dev/icons?i=cpp,c,ts,js,dart,swift,python,java,bash,mysql" />
 </p>
 
 ## Frameworks & Tools
@@ -72,10 +72,42 @@ Designed and implemented a database storage simulation system focused on indexin
 - AVL-tree based indexing
 - Bulk insertion from `.txt` files
 - Physical storage calculations
-- Custom data organization logic
+- Custom low-level storage logic
 
 ### Focus Areas
 `C++` • `Data Structures` • `File Systems` • `Indexing`
+
+---
+
+## TCP Scanner
+
+Networking-focused project implementing TCP scanning and socket-based communication concepts inspired by low-level network tooling.  [oai_citation:0‡GitHub](https://github.com/robertdavidgraham/masscan?utm_source=chatgpt.com)
+
+### Highlights
+- TCP socket communication
+- Port scanning workflows
+- Concurrent network operations
+- Low-level networking concepts
+- Network analysis tooling
+
+### Focus Areas
+`C++` • `TCP/IP` • `Sockets` • `Networking`
+
+---
+
+## UNIX Log Parser
+
+UNIX-oriented log parsing and analysis utility focused on efficient processing of structured system logs.  [oai_citation:1‡GitHub](https://github.com/yurilaaziz/log-analyzer?utm_source=chatgpt.com)
+
+### Highlights
+- Structured log parsing
+- Pattern extraction
+- UNIX workflow integration
+- CLI-oriented tooling
+- Text processing pipelines
+
+### Focus Areas
+`C++` • `Linux` • `Parsing` • `CLI Tools`
 
 ---
 
@@ -126,21 +158,11 @@ Landscape-oriented iOS clock application developed using Swift and distributed t
 
 ---
 
-## AI-Powered Education Platform Concept
-
-Personalized education platform concept focused on digital inclusion and AI-assisted learning experiences.
-
-### Focus Areas
-- Adaptive education systems
-- AI-assisted workflows
-- Inclusion-focused design
-- Product architecture
-
----
-
 # Engineering Interests
 
 - Database internals
+- Networking systems
+- UNIX tooling
 - Indexing optimization
 - Software architecture
 - Web and mobile development
@@ -166,9 +188,10 @@ Personalized education platform concept focused on digital inclusion and AI-assi
 
 - Building scalable software systems
 - Improving low-level programming skills
+- Exploring networking and UNIX internals
 - Developing production-oriented applications
-- Exploring AI-assisted software engineering
 - Learning advanced database architecture concepts
+- Exploring AI-assisted software engineering
 
 ---
 
@@ -182,3 +205,11 @@ Personalized education platform concept focused on digital inclusion and AI-assi
     <img src="https://skillicons.dev/icons?i=linkedin" />
   </a>
 </p>
+
+---
+
+<div align="center">
+
+### "Build things that are technically solid and genuinely useful."
+
+</div>
