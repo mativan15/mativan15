@@ -2,7 +2,7 @@
 
 # Iván Sardon
 
-### Computer Science Student • Software Engineer • Systems & Mobile Development
+### Computer Science Student • Software Engineer • Systems, Web & Mobile Development
 
 Building scalable applications, database systems and real-world software solutions.
 
@@ -11,8 +11,18 @@ Building scalable applications, database systems and real-world software solutio
     <img src="https://img.shields.io/github/followers/mativan15?label=Followers&style=for-the-badge" />
   </a>
   <img src="https://img.shields.io/badge/C%2B%2B-Systems%20Programming-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/TypeScript-Web%20Development-3178C6?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Flutter-Mobile%20Development-02569B?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Firebase-Backend-orange?style=for-the-badge" />
+</p>
+
+<p align="center">
+  <a href="YOUR_PORTFOLIO_LINK">
+    <img src="https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=vercel&logoColor=white" />
+  </a>
+  <a href="YOUR_LINKEDIN_LINK">
+    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
+  </a>
 </p>
 
 </div>
@@ -25,6 +35,7 @@ Computer Science student at Universidad Católica San Pablo with strong interest
 
 - Database systems
 - Software engineering
+- Web development
 - Mobile development
 - Low-level data structures
 - AI-assisted applications
@@ -39,13 +50,13 @@ I enjoy building technically challenging projects that combine engineering depth
 ## Languages
 
 <p>
-  <img src="https://skillicons.dev/icons?i=cpp,dart,swift,python,java,mysql" />
+  <img src="https://skillicons.dev/icons?i=cpp,ts,js,dart,swift,python,java,mysql" />
 </p>
 
 ## Frameworks & Tools
 
 <p>
-  <img src="https://skillicons.dev/icons?i=flutter,firebase,mongodb,docker,git,linux,vscode,xcode" />
+  <img src="https://skillicons.dev/icons?i=react,nextjs,nodejs,flutter,firebase,mongodb,docker,git,linux,vscode,xcode" />
 </p>
 
 ---
@@ -84,6 +95,22 @@ Business-oriented mobile application for inventory management and automated PDF 
 
 ---
 
+## Web Development Projects
+
+Developed responsive web applications focused on usability, scalability and clean architecture.
+
+### Features
+- Responsive interfaces
+- API integration
+- Component-based architecture
+- Backend connectivity
+- Modern frontend workflows
+
+### Focus Areas
+`TypeScript` • `React` • `Next.js` • `Node.js`
+
+---
+
 ## iOS Digital Clock Application
 
 Landscape-oriented iOS clock application developed using Swift and distributed through TestFlight.
@@ -116,7 +143,7 @@ Personalized education platform concept focused on digital inclusion and AI-assi
 - Database internals
 - Indexing optimization
 - Software architecture
-- Mobile application development
+- Web and mobile development
 - Backend systems
 - Performance-oriented programming
 - AI integration in software products
@@ -139,7 +166,7 @@ Personalized education platform concept focused on digital inclusion and AI-assi
 
 - Building scalable software systems
 - Improving low-level programming skills
-- Developing production-oriented mobile applications
+- Developing production-oriented applications
 - Exploring AI-assisted software engineering
 - Learning advanced database architecture concepts
 
@@ -151,12 +178,7 @@ Personalized education platform concept focused on digital inclusion and AI-assi
   <a href="https://github.com/mativan15">
     <img src="https://skillicons.dev/icons?i=github" />
   </a>
+  <a href="YOUR_LINKEDIN_LINK">
+    <img src="https://skillicons.dev/icons?i=linkedin" />
+  </a>
 </p>
-
----
-
-<div align="center">
-
-### "Build things that are technically solid and genuinely useful."
-
-</div>
