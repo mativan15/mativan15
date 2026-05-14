@@ -79,9 +79,25 @@ Designed and implemented a database storage simulation system focused on indexin
 
 ---
 
+## TrendingTopicsAnalyzer
+
+Data analysis and trend exploration project focused on identifying and analyzing trending topics from structured datasets and online sources.
+
+### Highlights
+- Trend detection workflows
+- Data parsing and processing
+- Structured analytics pipelines
+- Topic ranking and filtering
+- Data visualization preparation
+
+### Focus Areas
+`Python` • `Data Analysis` • `Parsing` • `Analytics`
+
+---
+
 ## TCP Scanner
 
-Networking-focused project implementing TCP scanning and socket-based communication concepts inspired by low-level network tooling.  [oai_citation:0‡GitHub](https://github.com/robertdavidgraham/masscan?utm_source=chatgpt.com)
+Networking-focused project implementing TCP scanning and socket-based communication concepts inspired by low-level network tooling.
 
 ### Highlights
 - TCP socket communication
@@ -97,7 +113,7 @@ Networking-focused project implementing TCP scanning and socket-based communicat
 
 ## UNIX Log Parser
 
-UNIX-oriented log parsing and analysis utility focused on efficient processing of structured system logs.  [oai_citation:1‡GitHub](https://github.com/yurilaaziz/log-analyzer?utm_source=chatgpt.com)
+UNIX-oriented log parsing and analysis utility focused on efficient processing of structured system logs.
 
 ### Highlights
 - Structured log parsing
@@ -108,6 +124,54 @@ UNIX-oriented log parsing and analysis utility focused on efficient processing o
 
 ### Focus Areas
 `C++` • `Linux` • `Parsing` • `CLI Tools`
+
+---
+
+## Lord Basilisk Game
+
+Game development project focused on interactive gameplay systems, custom mechanics and object-oriented architecture.
+
+### Highlights
+- Gameplay logic implementation
+- Entity and state management
+- Interactive game systems
+- Object-oriented design
+- Real-time interaction handling
+
+### Focus Areas
+`C++` • `Game Development` • `OOP` • `Interactive Systems`
+
+---
+
+## PACE App
+
+Application designed to improve productivity and workflow organization through structured task and process management.
+
+### Features
+- User-oriented workflow design
+- Task and activity management
+- Responsive interface implementation
+- Scalable application structure
+- Practical productivity tooling
+
+### Focus Areas
+`Flutter` • `Firebase` • `Mobile Development`
+
+---
+
+## EMIT App
+
+Software solution focused on modern application workflows and scalable mobile-oriented architecture.
+
+### Features
+- Responsive mobile interface
+- Backend integration
+- Structured application architecture
+- Real-world workflow implementation
+- Cross-platform development
+
+### Focus Areas
+`Flutter` • `Firebase` • `Application Architecture`
 
 ---
 
@@ -169,6 +233,7 @@ Landscape-oriented iOS clock application developed using Swift and distributed t
 - Backend systems
 - Performance-oriented programming
 - AI integration in software products
+- Data analysis and trend exploration
 
 ---
 
