@@ -17,10 +17,10 @@ Building scalable applications, low-level systems and real-world software soluti
 </p>
 
 <p align="center">
-  <a href="YOUR_PORTFOLIO_LINK">
+  <a href="https://mativan15.github.io/mativan15/">
     <img src="https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=vercel&logoColor=white" />
   </a>
-  <a href="YOUR_LINKEDIN_LINK">
+  <a href="www.linkedin.com/in/ivan-sardon-medina">
     <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" />
   </a>
 </p>
@@ -243,7 +243,7 @@ Landscape-oriented iOS clock application developed using Swift and distributed t
 
 <img height="170" src="https://github-readme-stats.vercel.app/api?username=mativan15&show_icons=true&theme=tokyonight&hide_border=true" />
 
-<img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=mativan15&layout=compact&theme=tokyonight&hide_border=true" />
+<img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=mativan15&layout=compact&theme=tokyonight" />
 
 </div>
 
