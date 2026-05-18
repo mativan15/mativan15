@@ -1,6 +1,6 @@
 <div align="center">
 
-# Iván Sardon
+# Iván Sardón Medina
 
 ### Computer Science Student • Software Engineer • Systems, Networking, Web & Mobile Development
 
@@ -274,7 +274,5 @@ Landscape-oriented iOS clock application developed using Swift and distributed t
 ---
 
 <div align="center">
-
-### "Build things that are technically solid and genuinely useful."
 
 </div>
