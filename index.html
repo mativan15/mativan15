@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfolio of Iván Matthías Sardón Medina, a Computer Science student and software developer focused on systems, networking, web, mobile, databases, and applied software.">
-    <meta name="keywords" content="Ivan Sardon, Iván Sardón, Iván Matthías Sardón Medina, software developer, computer science, UCSP, C++, Flutter, React, networking, database systems">
-    <meta name="author" content="Iván Matthías Sardón Medina">
-    <meta property="og:title" content="Iván Matthías Sardón Medina - Software Developer">
+    <meta name="description" content="Portfolio of Ivan Matthias Sardon Medina, a Computer Science student and software developer focused on systems, networking, web, mobile, databases, and applied software.">
+    <meta name="keywords" content="Ivan Sardon, Ivan Matthias Sardon Medina, software developer, computer science, UCSP, C++, Flutter, React, networking, database systems">
+    <meta name="author" content="Ivan Matthias Sardon Medina">
+    <meta property="og:title" content="Ivan Matthias Sardon Medina - Software Developer">
     <meta property="og:description" content="Systems, networking, web, mobile, and product-oriented software portfolio.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="myPhoto.jpg">
     <meta property="og:url" content="https://mativan15.github.io/mativan15/">
-    <title>Iván Matthías Sardón Medina | Software Developer</title>
+    <title>Ivan Matthias Sardon Medina | Software Developer</title>
     <link rel="canonical" href="https://mativan15.github.io/mativan15/">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="icon.png">
@@ -19,12 +19,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script defer src="script.js"></script>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Person",
-        "name": "Iván Matthías Sardón Medina",
+        "name": "Ivan Matthias Sardon Medina",
         "url": "https://mativan15.github.io/mativan15/",
         "image": "https://mativan15.github.io/mativan15/myPhoto.jpg",
         "email": "mailto:ivan.sardon@ucsp.edu.pe",
@@ -56,9 +58,9 @@
 
     <header class="site-header" data-header>
         <nav class="nav-shell" aria-label="Primary navigation">
-            <a class="brand" href="#top" aria-label="Iván Sardón home">
+            <a class="brand" href="#top" aria-label="Ivan Sardon home">
                 <span class="brand-mark">IS</span>
-                <span>Iván Sardón</span>
+                <span>Ivan Sardon</span>
             </a>
 
             <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-menu" data-nav-toggle>
@@ -78,42 +80,25 @@
     </header>
 
     <main id="main">
-        <section class="hero section" id="top">
-            <div class="hero-grid">
-                <div class="hero-copy reveal">
-                    <p class="eyebrow">Computer Science at UCSP / Software Developer</p>
-                    <h1>Software, From <span>Core</span> to Interface</h1>
-                    <p class="hero-lede">
-                        I am Iván Matthías Sardón Medina, a developer from Arequipa, Peru focused on engineering depth, practical products, and the full path from data structures and networking to web and mobile experiences.
-                    </p>
-
-                    <div class="hero-actions" aria-label="Portfolio actions">
-                        <a class="button button-primary" href="#projects">Explore projects</a>
-                        <a class="button button-secondary" href="mailto:ivan.sardon@ucsp.edu.pe">Contact me by email</a>
-                    </div>
-
-                    <div class="social-row" aria-label="Social links">
-                        <a href="https://github.com/mativan15" target="_blank" rel="noreferrer">GitHub</a>
-                        <a href="https://www.linkedin.com/in/iv%C3%A1n-sard%C3%B3n-medina-47b16329b" target="_blank" rel="noreferrer">LinkedIn</a>
-                        <a href="https://www.instagram.com/mat.ivaan/" target="_blank" rel="noreferrer">Instagram</a>
-                    </div>
-                </div>
-
-                <div class="hero-visual reveal" aria-label="Portrait and technical profile">
-                    <div class="code-stream" aria-hidden="true">
-                        <span>index::dense</span>
-                        <span>socket.listen()</span>
-                        <span>render(product)</span>
-                        <span>ship/mobile</span>
-                    </div>
-                    <div class="portrait-card">
-                        <img src="myPhoto.jpg" alt="Portrait of Iván Matthías Sardón Medina" width="2736" height="3648">
-                    </div>
-                    <div class="signal-panel">
-                        <span class="panel-label">Current focus</span>
-                        <strong>Systems + product software</strong>
-                        <p>Databases, networking, UNIX tooling, mobile apps, web interfaces, and AI-assisted applications.</p>
-                    </div>
+        <section class="canopy-scroll" id="top" aria-label="Ivan Sardon">
+            <div class="canopy-pin" id="canopy-pin">
+                <svg class="lens-rays" id="lens-rays" aria-hidden="true"></svg>
+                <h1 class="canopy-name" id="canopy-name">
+                    <span class="name-line">
+                        <span class="name-rim" aria-hidden="true">Ivan</span>
+                        <span class="name-fill">Ivan</span>
+                        <span class="name-beam" aria-hidden="true">Ivan</span>
+                    </span>
+                    <span class="name-line">
+                        <span class="name-rim" aria-hidden="true">Sardon</span>
+                        <span class="name-fill">Sardon</span>
+                        <span class="name-beam" aria-hidden="true">Sardon</span>
+                    </span>
+                </h1>
+                <p class="canopy-hint">Move the pointer</p>
+                <div class="lens-rig" id="lens-rig">
+                    <img class="canopy-lens" src="sketches/amber-lens.jpg" alt="">
+                    <canvas class="canopy-field" id="canopy-field" aria-hidden="true"></canvas>
                 </div>
             </div>
         </section>
@@ -324,9 +309,15 @@
             <div class="section-heading reveal">
                 <p class="eyebrow">About</p>
                 <h2>Curiosity, technical discipline, and creative range.</h2>
+                <figure class="about-portrait">
+                    <img src="myPhoto.jpg" alt="Portrait of Ivan Matthias Sardon Medina" width="2736" height="3648">
+                </figure>
             </div>
 
             <div class="about-copy reveal">
+                <p>
+                    I am Ivan Matthias Sardon Medina, a developer from Arequipa, Peru, focused on the path from data structures and networking to web and mobile products.
+                </p>
                 <p>
                     I was born in Arequipa, Peru in 2005. In school, Mathematics, Computer Science, and English became early strengths, and after exploring engineering I found Computer Science at Universidad Católica San Pablo.
                 </p>
@@ -359,7 +350,7 @@
     </main>
 
     <footer class="site-footer">
-        <p>&copy; <span data-year></span> Iván Matthías Sardón Medina. Built for GitHub Pages.</p>
+        <p>&copy; <span data-year></span> Ivan Matthias Sardon Medina. Built for GitHub Pages.</p>
         <a href="#top">Back to top</a>
     </footer>
 </body>

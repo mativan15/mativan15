@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tree · Amber Lens</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #07080A; }
+    body {
+      color: #E7E1D6;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
+    .stage {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      touch-action: none;
+      background: #07080A;
+    }
+    .lens {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 72% center;
+      pointer-events: none;
+    }
+    .field { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+    .glyph {
+      position: absolute;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      color: #E7E1D6;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    .glyph.is-amber { color: #E8A04A; }
+    .cursor {
+      position: absolute;
+      z-index: 6;
+      width: 28px;
+      height: 28px;
+      margin-left: -14px;
+      margin-top: -14px;
+      border: 1.5px solid #E7E1D6;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .nav {
+      position: absolute;
+      z-index: 5;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 22px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(232, 160, 74, 0.45);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(18px) saturate(1.6);
+    }
+    .nav a {
+      color: #E7E1D6;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .nav a[aria-current="page"] { color: #E8A04A; }
+    .nav a:focus-visible { outline: 2px solid #E8A04A; outline-offset: 4px; }
+    h1 {
+      position: absolute;
+      z-index: 4;
+      left: 7vw;
+      top: 50%;
+      transform: translateY(-50%);
+      margin: 0;
+      font-size: clamp(64px, 8vw, 120px);
+      line-height: 0.85;
+      letter-spacing: -0.045em;
+      pointer-events: none;
+    }
+    .hint {
+      position: absolute;
+      z-index: 4;
+      right: 28px;
+      bottom: 24px;
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.72;
+    }
+    @media (max-width: 800px) {
+      h1 { top: 96px; transform: none; font-size: 56px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <img class="lens" src="amber-lens.jpg" alt="">
+    <div class="field" id="field" aria-hidden="true"></div>
+    <div class="cursor" id="cursor"></div>
+    <nav class="nav" aria-label="Sketches">
+      <a href="canopy.html">Canopy</a>
+      <a href="written-lens.html">Written lens</a>
+      <a href="tree.html" aria-current="page">Tree</a>
+    </nav>
+    <h1>Ivan<br>Sardon</h1>
+    <p class="hint">Move the pointer</p>
+  </div>
+  <script>
+    const GLYPHS = ["{", "}", "(", ")", ";", "->", "=>", "0x", "[", "]", "fn", "#", "&", "*", "/", "="];
+    const stage = document.getElementById("stage");
+    const field = document.getElementById("field");
+    const cursor = document.getElementById("cursor");
+    const mouse = { x: -9999, y: -9999, on: false };
+    let items = [];
+
+    function homes(w, h) {
+      const list = [];
+      const cx = w * 0.68;
+      const cy = h * 0.34;
+      const rx = Math.min(w * 0.20, 260);
+      const ry = Math.min(h * 0.22, 190);
+      let n = 0;
+
+      for (let ring = 1; ring <= 5; ring++) {
+        const count = 8 + ring * 7;
+        for (let k = 0; k < count; k++) {
+          const angle = (k / count) * Math.PI * 2 + ring * 0.35;
+          const jitter = 0.86 + ((n * 17) % 10) / 40;
+          list.push({
+            x: cx + Math.cos(angle) * rx * (ring / 5) * jitter,
+            y: cy + Math.sin(angle) * ry * (ring / 5) * jitter,
+            glyph: GLYPHS[n % GLYPHS.length],
+            amber: n % 5 === 0
+          });
+          n++;
+        }
+      }
+
+      const top = cy + ry * 0.2;
+      const bottom = h * 0.8;
+      for (let t = 0; t < 32; t++) {
+        const u = t / 31;
+        const spread = (1 - u) * 46 + 7;
+        const side = t % 2 === 0 ? -1 : 1;
+        list.push({
+          x: cx + side * spread * (0.25 + (t % 5) / 10),
+          y: top + (bottom - top) * u,
+          glyph: GLYPHS[n % GLYPHS.length],
+          amber: n % 5 === 0
+        });
+        n++;
+      }
+      return list;
+    }
+
+    function build() {
+      field.replaceChildren();
+      items = homes(stage.clientWidth, stage.clientHeight).map((home) => {
+        const el = document.createElement("span");
+        el.className = "glyph" + (home.amber ? " is-amber" : "");
+        el.textContent = home.glyph;
+        el.style.left = home.x + "px";
+        el.style.top = home.y + "px";
+        field.appendChild(el);
+        return { ...home, el, base: home.amber ? 0.95 : 0.75 };
+      });
+    }
+
+    function place() {
+      const radius = 120;
+      cursor.style.opacity = mouse.on ? "1" : "0";
+      cursor.style.left = mouse.x + "px";
+      cursor.style.top = mouse.y + "px";
+
+      for (const item of items) {
+        if (!mouse.on) {
+          item.el.style.transform = "translate(-50%, -50%)";
+          item.el.style.opacity = String(item.base);
+          continue;
+        }
+        const dx = item.x - mouse.x;
+        const dy = item.y - mouse.y;
+        const dist = Math.hypot(dx, dy) || 0.001;
+        if (dist < radius) {
+          const force = (radius - dist) / radius;
+          const tx = (dx / dist) * force * 58;
+          const ty = (dy / dist) * force * 58;
+          item.el.style.transform = "translate(calc(-50% + " + tx + "px), calc(-50% + " + ty + "px))";
+          item.el.style.opacity = String(item.base * (0.15 + 0.85 * (dist / radius)));
+        } else {
+          item.el.style.transform = "translate(-50%, -50%)";
+          item.el.style.opacity = String(item.base);
+        }
+      }
+      requestAnimationFrame(place);
+    }
+
+    stage.addEventListener("pointermove", (event) => {
+      const rect = stage.getBoundingClientRect();
+      mouse.x = event.clientX - rect.left;
+      mouse.y = event.clientY - rect.top;
+      mouse.on = true;
+    });
+    stage.addEventListener("pointerleave", () => {
+      mouse.on = false;
+    });
+    window.addEventListener("resize", build);
+    build();
+    requestAnimationFrame(place);
+  </script>
+</body>
+</html>

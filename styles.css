@@ -1236,3 +1236,199 @@ h3 {
         background-position: 180% 50%;
     }
 }
+
+.canopy-scroll {
+    position: relative;
+    height: 220vh;
+    margin-top: -76px;
+    background: #07080A;
+}
+
+.canopy-pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: #07080A;
+    touch-action: pan-y;
+}
+
+.lens-rig {
+    position: absolute;
+    z-index: 2;
+    left: 68%;
+    top: 78%;
+    width: min(46vh, 520px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.canopy-lens {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 78% 42%;
+    pointer-events: none;
+    user-select: none;
+}
+
+.canopy-field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.lens-rays {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    filter: drop-shadow(0 0 6px rgba(232, 160, 74, 0.85));
+}
+
+.canopy-name {
+    position: absolute;
+    z-index: 4;
+    left: 7vw;
+    top: 50%;
+    margin: 0;
+    max-width: none;
+    transform: translateY(-50%);
+    color: #E7E1D6;
+    font-size: clamp(4.4rem, 8.2vw, 7.5rem);
+    font-weight: 700;
+    line-height: 0.84;
+    letter-spacing: -0.045em;
+    pointer-events: none;
+    --caustic-y: 78%;
+    --caustic-band: 22%;
+    --beam: 0.28;
+}
+
+.name-line {
+    position: relative;
+    display: block;
+}
+
+.canopy-name .name-fill,
+.canopy-name .name-rim,
+.canopy-name .name-beam {
+    display: block;
+    background: none;
+    animation: none;
+    font: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+}
+
+.canopy-name .name-fill {
+    position: relative;
+    z-index: 1;
+    color: #E7E1D6;
+    -webkit-text-fill-color: #E7E1D6;
+    text-shadow:
+        0 1px 0 rgba(255, 252, 246, 0.38),
+        0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+
+.canopy-name .name-rim,
+.canopy-name .name-beam {
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.canopy-name .name-rim {
+    z-index: 0;
+    -webkit-text-stroke: 3px rgba(255, 248, 236, 0.9);
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.95);
+}
+
+.canopy-name .name-beam {
+    z-index: 2;
+    -webkit-text-stroke: 5px rgba(232, 160, 74, var(--beam));
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 12px rgba(232, 160, 74, 0.8));
+    -webkit-mask-image: radial-gradient(ellipse 150% var(--caustic-band) at 100% var(--caustic-y), #000 0%, rgba(0, 0, 0, 0.88) 36%, transparent 72%);
+    mask-image: radial-gradient(ellipse 150% var(--caustic-band) at 100% var(--caustic-y), #000 0%, rgba(0, 0, 0, 0.88) 36%, transparent 72%);
+}
+
+.canopy-hint {
+    position: absolute;
+    z-index: 4;
+    left: 7vw;
+    bottom: 28px;
+    margin: 0;
+    color: #E7E1D6;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.about-portrait {
+    margin: 28px 0 0;
+    overflow: hidden;
+    height: 460px;
+    border-radius: var(--radius-lg);
+    background: var(--surface-raised);
+}
+
+.about-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 22%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .canopy-scroll {
+        height: 100svh;
+    }
+}
+
+@media (max-width: 800px) {
+    .canopy-name {
+        top: 108px;
+        left: 24px;
+        transform: none;
+        font-size: 3.6rem;
+    }
+
+    .canopy-hint {
+        left: 24px;
+    }
+
+    .canopy-name .name-rim {
+        -webkit-text-stroke-width: 2px;
+    }
+
+    .canopy-name .name-beam {
+        -webkit-text-stroke-width: 3px;
+    }
+}
+
+@media (max-width: 720px) {
+    .canopy-scroll {
+        margin-top: -66px;
+    }
+
+    .about-portrait {
+        height: 380px;
+    }
+}

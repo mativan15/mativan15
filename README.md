@@ -1,6 +1,6 @@
 <div align="center">
 
-# Iván Sardon
+# Ivan Sardon
 
 ### Computer Science Student • Software Engineer • Systems, Networking, Web & Mobile Development
 
