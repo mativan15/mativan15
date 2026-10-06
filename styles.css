@@ -1359,9 +1359,9 @@ h3 {
 
 .canopy-name .name-beam {
     z-index: 2;
-    -webkit-text-stroke: 5px rgba(232, 160, 74, var(--beam));
+    -webkit-text-stroke: 7px rgba(232, 160, 74, var(--beam));
     mix-blend-mode: screen;
-    filter: drop-shadow(0 0 12px rgba(232, 160, 74, 0.8));
+    filter: drop-shadow(0 0 16px rgba(232, 160, 74, 0.95));
     -webkit-mask-image: radial-gradient(ellipse 150% var(--caustic-band) at 100% var(--caustic-y), #000 0%, rgba(0, 0, 0, 0.88) 36%, transparent 72%);
     mask-image: radial-gradient(ellipse 150% var(--caustic-band) at 100% var(--caustic-y), #000 0%, rgba(0, 0, 0, 0.88) 36%, transparent 72%);
 }

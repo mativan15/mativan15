@@ -122,12 +122,30 @@ if (pin && rig && canvas && canopyName && raySvg && scrollScene) {
 
     const headerOffset = () => (window.matchMedia("(max-width: 720px)").matches ? 66 : 76);
 
-    const landY = (heightOnLens, lensX, lensY, screenX, focal) => {
+    const refract = (heightOnLens, focal) => {
         const theta = -heightOnLens / focal;
-        const dx = -Math.cos(theta);
-        const dy = Math.sin(theta);
+        return {
+            dx: -Math.cos(theta),
+            dy: Math.sin(theta)
+        };
+    };
+
+    const landY = (heightOnLens, lensX, lensY, screenX, focal) => {
+        const { dx, dy } = refract(heightOnLens, focal);
         const travel = (screenX - lensX) / dx;
         return lensY + heightOnLens + travel * dy;
+    };
+
+    const exitLens = (heightOnLens, lensX, lensY, radius, focal) => {
+        const { dx, dy } = refract(heightOnLens, focal);
+        const bend = 2 * heightOnLens * dy;
+        const offset = heightOnLens * heightOnLens - radius * radius;
+        const root = Math.sqrt(Math.max(0, bend * bend - 4 * offset));
+        const travel = Math.max((-bend + root) / 2, (-bend - root) / 2, 0);
+        return {
+            x: lensX + travel * dx,
+            y: lensY + heightOnLens + travel * dy
+        };
     };
 
     for (let i = 0; i < rayCount; i += 1) {
@@ -220,9 +238,9 @@ if (pin && rig && canvas && canopyName && raySvg && scrollScene) {
         const spreadPx = Math.abs(highY - lowY) / 2;
         const spreadPct = Math.max(7, Math.min(42, (spreadPx / Math.max(nameRect.height, 1)) * 100));
         const causticY = ((axisY - nameTop) / Math.max(nameRect.height, 1)) * 100;
-        const align = 1 - Math.min(1, Math.abs(axisY - (nameTop + nameRect.height / 2)) / (nameRect.height * 0.75));
-        const focus = 1 - Math.min(1, Math.abs(Math.abs(gap) - focal) / (focal * 0.85));
-        const strength = 0.12 + 0.88 * align * (0.45 + 0.55 * focus);
+        const align = 1 - Math.min(1, Math.abs(axisY - (nameTop + nameRect.height / 2)) / (nameRect.height * 0.7));
+        const focus = 1 - Math.min(1, Math.abs(Math.abs(gap) - focal) / (focal * 0.65));
+        const strength = Math.min(1, 0.08 + align * (0.62 + 0.38 * focus));
 
         canopyName.style.setProperty("--caustic-y", causticY.toFixed(1) + "%");
         canopyName.style.setProperty("--caustic-band", spreadPct.toFixed(1) + "%");
@@ -231,9 +249,9 @@ if (pin && rig && canvas && canopyName && raySvg && scrollScene) {
 
         for (const ray of rays) {
             const heightOnLens = ray.unit * radius;
-            const rim = Math.sqrt(Math.max(0, radius * radius - heightOnLens * heightOnLens));
-            const x1 = lensX - rim;
-            const y1 = lensY + heightOnLens;
+            const exit = exitLens(heightOnLens, lensX, lensY, radius, focal);
+            const x1 = exit.x;
+            const y1 = exit.y;
             const y2 = landY(heightOnLens, lensX, lensY, nameRight, focal);
             const onName = y2 >= nameTop - 8 && y2 <= nameBottom + 8;
             const coreOpacity = onName ? 0.92 : 0.18;
