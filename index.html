@@ -2,27 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (function () {
+            var saved = "";
+            try { saved = localStorage.getItem("site-lang") || ""; } catch (e) {}
+            var fromUrl = "";
+            try { fromUrl = new URLSearchParams(location.search).get("lang") || ""; } catch (e) {}
+            function known(value) { return value === "en" || value === "pt" || value === "es"; }
+            var lang = known(saved) ? saved : known(fromUrl) ? fromUrl : "";
+            if (!lang) {
+                var list = navigator.languages || [navigator.language || "en"];
+                lang = "en";
+                for (var i = 0; i < list.length; i += 1) {
+                    var base = String(list[i] || "").toLowerCase().split("-")[0];
+                    if (base === "pt" || base === "es" || base === "en") { lang = base; break; }
+                }
+            }
+            document.documentElement.lang = lang;
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfolio of Ivan Matthias Sardon Medina, a Computer Science student and software developer focused on systems, networking, web, mobile, databases, and applied software.">
-    <meta name="keywords" content="Ivan Sardon, Ivan Matthias Sardon Medina, software developer, computer science, UCSP, C++, Flutter, React, networking, database systems">
+    <meta name="description" data-i18n-content="meta.description" content="Portfolio of Ivan Matthias Sardon Medina, a Computer Science student and software developer focused on systems, networking, web, mobile, databases, and applied software.">
+    <meta name="keywords" data-i18n-content="meta.keywords" content="Ivan Sardon, Ivan Matthias Sardon Medina, software developer, computer science, UCSP, C++, Flutter, React, networking, database systems">
     <meta name="author" content="Ivan Matthias Sardon Medina">
-    <meta property="og:title" content="Ivan Matthias Sardon Medina - Software Developer">
-    <meta property="og:description" content="Systems, networking, web, mobile, and product-oriented software portfolio.">
+    <meta property="og:title" data-i18n-content="meta.ogTitle" content="Ivan Matthias Sardon Medina - Software Developer">
+    <meta property="og:description" data-i18n-content="meta.ogDescription" content="Systems, networking, web, mobile, and product-oriented software portfolio.">
+    <meta property="og:locale" data-i18n-content="meta.locale" content="en_US">
     <meta property="og:type" content="website">
     <meta property="og:image" content="myPhoto.jpg">
     <meta property="og:url" content="https://mativan15.github.io/mativan15/">
-    <title>Ivan Matthias Sardon Medina | Software Developer</title>
+    <title data-i18n="meta.title">Ivan Matthias Sardon Medina | Software Developer</title>
     <link rel="canonical" href="https://mativan15.github.io/mativan15/">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=23">
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <script defer src="script.js"></script>
-    <script type="application/ld+json">
+    <script defer src="script.js?v=54"></script>
+    <script id="person-data" type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Person",
@@ -54,106 +74,118 @@
     </script>
 </head>
 <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 
     <header class="site-header" data-header>
-        <nav class="nav-shell" aria-label="Primary navigation">
-            <a class="brand" href="#top" aria-label="Ivan Sardon home">
+        <nav class="nav-shell" data-i18n-aria="nav.primary" aria-label="Primary navigation">
+            <a class="brand" href="#top" data-i18n-aria="brand.home" aria-label="Ivan Sardon home">
                 <span class="brand-mark">IS</span>
                 <span>Ivan Sardon</span>
             </a>
 
-            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-menu" data-nav-toggle>
-                <span class="sr-only">Open navigation</span>
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+            <div class="nav-end">
+                <div class="nav-links" id="primary-menu" data-nav-menu>
+                    <a href="#expertise" data-i18n="nav.expertise">Expertise</a>
+                    <a href="#projects" data-i18n="nav.projects">Projects</a>
+                    <a href="#about" data-i18n="nav.about">About</a>
+                    <a href="#contact" data-i18n="nav.contact">Contact</a>
+                </div>
 
-            <div class="nav-links" id="primary-menu" data-nav-menu>
-                <a href="#expertise">Expertise</a>
-                <a href="#projects">Projects</a>
-                <a href="#about">About</a>
-                <a href="#contact">Contact</a>
+                <div class="lang-switch" role="radiogroup" data-i18n-aria="lang.label" aria-label="Language">
+                    <button type="button" role="radio" data-set-lang="en" lang="en" aria-label="English" aria-checked="true" tabindex="0">EN</button>
+                    <button type="button" role="radio" data-set-lang="pt" lang="pt" aria-label="Português" aria-checked="false" tabindex="-1">PT</button>
+                    <button type="button" role="radio" data-set-lang="es" lang="es" aria-label="Español" aria-checked="false" tabindex="-1">ES</button>
+                </div>
+
+                <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-menu" data-nav-toggle>
+                    <span class="sr-only" data-i18n="nav.open" data-i18n-expanded="nav.close">Open navigation</span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </nav>
+        <p class="sr-only" data-lang-status aria-live="polite"></p>
     </header>
 
     <main id="main">
-        <section class="canopy-scroll" id="top" aria-label="Ivan Sardon">
+        <section class="canopy-scroll" id="top" aria-label="Ivan Sardon Medina">
             <div class="canopy-pin" id="canopy-pin">
-                <svg class="lens-rays" id="lens-rays" aria-hidden="true"></svg>
+                <canvas class="canopy-field" id="canopy-field" aria-hidden="true"></canvas>
+                <canvas class="lens-gl" id="lens-gl" aria-hidden="true"></canvas>
                 <h1 class="canopy-name" id="canopy-name">
-                    <span class="name-line">
-                        <span class="name-rim" aria-hidden="true">Ivan</span>
-                        <span class="name-fill">Ivan</span>
-                        <span class="name-beam" aria-hidden="true">Ivan</span>
+                    <span class="name-fill">
+                        <span class="name-line">Ivan</span>
+                        <span class="name-line">Sardon</span>
+                        <span class="name-line">Medina</span>
                     </span>
-                    <span class="name-line">
-                        <span class="name-rim" aria-hidden="true">Sardon</span>
-                        <span class="name-fill">Sardon</span>
-                        <span class="name-beam" aria-hidden="true">Sardon</span>
+                    <span class="name-rim" aria-hidden="true">
+                        <span class="name-line">Ivan</span>
+                        <span class="name-line">Sardon</span>
+                        <span class="name-line">Medina</span>
+                    </span>
+                    <span class="name-beam" aria-hidden="true">
+                        <span class="name-line">Ivan</span>
+                        <span class="name-line">Sardon</span>
+                        <span class="name-line">Medina</span>
                     </span>
                 </h1>
-                <p class="canopy-hint">Move the pointer</p>
-                <div class="lens-rig" id="lens-rig">
-                    <img class="canopy-lens" src="sketches/amber-lens.jpg" alt="">
-                    <canvas class="canopy-field" id="canopy-field" aria-hidden="true"></canvas>
-                </div>
+                <p class="canopy-hint" data-i18n="hint">Move the pointer</p>
+                <div class="lens-rig" id="lens-rig"></div>
             </div>
         </section>
 
-        <section class="section compact" aria-label="Profile highlights">
+        <section class="section compact" data-i18n-aria="profile.label" aria-label="Profile highlights">
             <div class="metrics reveal">
                 <article>
                     <span>2005</span>
-                    <p>Born in Arequipa, Peru</p>
+                    <p data-i18n="metric.born">Born in Arequipa, Peru</p>
                 </article>
                 <article>
                     <span>UCSP</span>
-                    <p>Computer Science student since March 2023</p>
+                    <p data-i18n="metric.student">Computer Science student since March 2023</p>
                 </article>
                 <article>
                     <span>Top 100</span>
-                    <p>NASA Space Apps global finalist with AyniTech</p>
+                    <p data-i18n="metric.finalist">NASA Space Apps global finalist with AyniTech</p>
                 </article>
             </div>
         </section>
 
         <section class="section" id="expertise">
             <div class="section-heading reveal">
-                <p class="eyebrow">Expertise spectrum</p>
-                <h2>One engineering mindset across very different application layers.</h2>
-                <p>
+                <p class="eyebrow" data-i18n="expertise.eyebrow">Expertise spectrum</p>
+                <h2 data-i18n="expertise.title">One engineering mindset across very different application layers.</h2>
+                <p data-i18n="expertise.body">
                     My work connects low-level implementation details with user-facing products: storage logic, indexing, sockets, command-line tools, backend architecture, web interfaces, mobile apps, and AI integration.
                 </p>
             </div>
 
-            <div class="spectrum reveal" aria-label="Low-level to high-level expertise">
+            <div class="spectrum reveal" data-i18n-aria="spectrum.label" aria-label="Low-level to high-level expertise">
                 <div class="spectrum-line" aria-hidden="true"></div>
                 <article>
                     <span>01</span>
-                    <h3>Systems</h3>
-                    <p>C, C++, memory, data structures, files, indexing, and performance-oriented programming.</p>
+                    <h3 data-i18n="spectrum.systems.title">Systems</h3>
+                    <p data-i18n="spectrum.systems.body">C, C++, memory, data structures, files, indexing, and performance-oriented programming.</p>
                 </article>
                 <article>
                     <span>02</span>
-                    <h3>Networking & UNIX</h3>
-                    <p>TCP/IP, sockets, Linux workflows, CLI tools, parsing, and automation-friendly utilities.</p>
+                    <h3 data-i18n="spectrum.network.title">Networking & UNIX</h3>
+                    <p data-i18n="spectrum.network.body">TCP/IP, sockets, Linux workflows, CLI tools, parsing, and automation-friendly utilities.</p>
                 </article>
                 <article>
                     <span>03</span>
-                    <h3>Backend & Data</h3>
-                    <p>Database concepts, scalable architecture, Firebase, MongoDB, MySQL, and API connectivity.</p>
+                    <h3 data-i18n="spectrum.data.title">Backend & Data</h3>
+                    <p data-i18n="spectrum.data.body">Database concepts, scalable architecture, Firebase, MongoDB, MySQL, and API connectivity.</p>
                 </article>
                 <article>
                     <span>04</span>
-                    <h3>Web & Mobile</h3>
-                    <p>TypeScript, React, Next.js, Flutter, Swift, responsive UI, and production-oriented app design.</p>
+                    <h3 data-i18n="spectrum.product.title">Web & Mobile</h3>
+                    <p data-i18n="spectrum.product.body">TypeScript, React, Next.js, Flutter, Swift, responsive UI, and production-oriented app design.</p>
                 </article>
             </div>
 
-            <div class="tool-grid reveal" aria-label="Technologies">
+            <div class="tool-grid reveal" data-i18n-aria="tech.label" aria-label="Technologies">
                 <span>C++</span>
                 <span>C</span>
                 <span>TypeScript</span>
@@ -175,9 +207,9 @@
 
         <section class="section dark-band" id="projects">
             <div class="section-heading invert reveal">
-                <p class="eyebrow">Featured projects</p>
-                <h2>Selected work that shows range, not just one stack.</h2>
-                <p>
+                <p class="eyebrow" data-i18n="projects.eyebrow">Featured projects</p>
+                <h2 data-i18n="projects.title">Selected work that shows range, not just one stack.</h2>
+                <p data-i18n="projects.body">
                     These projects are organized by the engineering capability they demonstrate, from database internals to mobile products and challenge-driven applications.
                 </p>
             </div>
@@ -185,28 +217,28 @@
             <div class="project-grid">
                 <article class="project-card feature reveal">
                     <div class="project-topline">
-                        <span class="project-type">Database internals</span>
+                        <span class="project-type" data-i18n="project.db.type">Database internals</span>
                         <span class="project-index">01</span>
                     </div>
-                    <h3>Custom Database Engine in C++</h3>
-                    <p>
+                    <h3 data-i18n="project.db.title">Custom Database Engine in C++</h3>
+                    <p data-i18n="project.db.body">
                         Designed and implemented a storage simulation system focused on sparse and dense indexing, AVL-tree based indexing, bulk insertion from text files, and physical storage calculations.
                     </p>
                     <div class="tag-row">
                         <span>C++</span>
-                        <span>Data Structures</span>
-                        <span>Indexing</span>
-                        <span>File Systems</span>
+                        <span data-i18n="tag.structures">Data Structures</span>
+                        <span data-i18n="tag.indexing">Indexing</span>
+                        <span data-i18n="tag.files">File Systems</span>
                     </div>
                 </article>
 
                 <article class="project-card reveal">
                     <div class="project-topline">
-                        <span class="project-type">Networking</span>
+                        <span class="project-type" data-i18n="project.tcp.type">Networking</span>
                         <span class="project-index">02</span>
                     </div>
-                    <h3>TCP Scanner</h3>
-                    <p>
+                    <h3 data-i18n="project.tcp.title">TCP Scanner</h3>
+                    <p data-i18n="project.tcp.body">
                         Socket-based network tooling project covering TCP communication, port scanning workflows, concurrent operations, and low-level analysis concepts.
                     </p>
                     <div class="tag-row">
@@ -218,27 +250,27 @@
 
                 <article class="project-card reveal">
                     <div class="project-topline">
-                        <span class="project-type">UNIX tooling</span>
+                        <span class="project-type" data-i18n="project.unix.type">UNIX tooling</span>
                         <span class="project-index">03</span>
                     </div>
-                    <h3>UNIX Log Parser</h3>
-                    <p>
+                    <h3 data-i18n="project.unix.title">UNIX Log Parser</h3>
+                    <p data-i18n="project.unix.body">
                         CLI-oriented utility for structured log parsing, pattern extraction, UNIX workflow integration, and efficient text processing.
                     </p>
                     <div class="tag-row">
                         <span>C++</span>
                         <span>Linux</span>
-                        <span>Parsing</span>
+                        <span data-i18n="tag.parsing">Parsing</span>
                     </div>
                 </article>
 
                 <article class="project-card reveal">
                     <div class="project-topline">
-                        <span class="project-type">Mobile product</span>
+                        <span class="project-type" data-i18n="project.mobile.type">Mobile product</span>
                         <span class="project-index">04</span>
                     </div>
-                    <h3>Flutter Inventory & Work Order System</h3>
-                    <p>
+                    <h3 data-i18n="project.mobile.title">Flutter Inventory & Work Order System</h3>
+                    <p data-i18n="project.mobile.body">
                         Business-oriented mobile app with real-time product search, Firestore multi-filter querying, dynamic PDF generation, inventory workflows, and responsive Flutter UI.
                     </p>
                     <div class="tag-row">
@@ -255,23 +287,23 @@
                         <span class="project-index">05</span>
                     </div>
                     <h3>RUNApp / AyniTech</h3>
-                    <p>
+                    <p data-i18n="project.nasa.body">
                         Educational Flutter app built for the EMIT for the Future challenge, using NASA mission data to explain health, community, and environmental impact in five Peruvian cities.
                     </p>
                     <div class="tag-row">
                         <span>Dart</span>
                         <span>Flutter</span>
-                        <span>NASA Data</span>
+                        <span data-i18n="tag.nasa">NASA Data</span>
                     </div>
                 </article>
 
                 <article class="project-card reveal">
                     <div class="project-topline">
-                        <span class="project-type">iOS + web</span>
+                        <span class="project-type" data-i18n="project.clock.type">iOS + web</span>
                         <span class="project-index">06</span>
                     </div>
-                    <h3>Digital Clock & Web Projects</h3>
-                    <p>
+                    <h3 data-i18n="project.clock.title">Digital Clock & Web Projects</h3>
+                    <p data-i18n="project.clock.body">
                         Swift-based landscape iOS clock application distributed through TestFlight, plus responsive web applications using component-based architecture and API integration.
                     </p>
                     <div class="tag-row">
@@ -285,21 +317,21 @@
 
             <div class="foundation-block reveal">
                 <div>
-                    <p class="eyebrow">Foundations</p>
-                    <h3>Early projects that shaped the base.</h3>
+                    <p class="eyebrow" data-i18n="foundations.eyebrow">Foundations</p>
+                    <h3 data-i18n="foundations.title">Early projects that shaped the base.</h3>
                 </div>
                 <div class="foundation-grid">
                     <article>
                         <h4>Lord Basilisk</h4>
-                        <p>Action RPG final group project that achieved the highest grade possible in the course history.</p>
+                        <p data-i18n="foundation.basilisk">Action RPG final group project that achieved the highest grade possible in the course history.</p>
                     </article>
                     <article>
-                        <h4>Santillana Sales Dashboard</h4>
-                        <p>C++ OOP dashboard using dynamic memory allocation, inheritance, and polymorphism.</p>
+                        <h4 data-i18n="foundation.sales.title">Santillana Sales Dashboard</h4>
+                        <p data-i18n="foundation.sales.body">C++ OOP dashboard using dynamic memory allocation, inheritance, and polymorphism.</p>
                     </article>
                     <article>
-                        <h4>Classic C++ Games</h4>
-                        <p>Snake and Tic Tac Toe console programs built as an introduction to C++ syntax and logic.</p>
+                        <h4 data-i18n="foundation.games.title">Classic C++ Games</h4>
+                        <p data-i18n="foundation.games.body">Snake and Tic Tac Toe console programs built as an introduction to C++ syntax and logic.</p>
                     </article>
                 </div>
             </div>
@@ -307,24 +339,24 @@
 
         <section class="section split" id="about">
             <div class="section-heading reveal">
-                <p class="eyebrow">About</p>
-                <h2>Curiosity, technical discipline, and creative range.</h2>
+                <p class="eyebrow" data-i18n="about.eyebrow">About</p>
+                <h2 data-i18n="about.title">Curiosity, technical discipline, and creative range.</h2>
                 <figure class="about-portrait">
-                    <img src="myPhoto.jpg" alt="Portrait of Ivan Matthias Sardon Medina" width="2736" height="3648">
+                    <img src="myPhoto.jpg?v=2" data-i18n-alt="about.alt" alt="Portrait of Ivan Matthias Sardon Medina" width="1800" height="2400" loading="lazy" decoding="async">
                 </figure>
             </div>
 
             <div class="about-copy reveal">
-                <p>
+                <p data-i18n="about.p1">
                     I am Ivan Matthias Sardon Medina, a developer from Arequipa, Peru, focused on the path from data structures and networking to web and mobile products.
                 </p>
-                <p>
+                <p data-i18n="about.p2">
                     I was born in Arequipa, Peru in 2005. In school, Mathematics, Computer Science, and English became early strengths, and after exploring engineering I found Computer Science at Universidad Católica San Pablo.
                 </p>
-                <p>
+                <p data-i18n="about.p3">
                     I began studying Computer Science in March 2023. Since then, I have focused on strong academic performance while learning beyond coursework through talks, congresses, hackathons, and projects that force me to understand software at different levels.
                 </p>
-                <p>
+                <p data-i18n="about.p4">
                     Outside software, I play piano, draw and paint across several media, train consistently, and enjoy volleyball and taekwondo. That creative side matters to my engineering work: I care about building products that are technically solid, usable, and thoughtfully designed.
                 </p>
             </div>
@@ -333,9 +365,9 @@
         <section class="section contact-section" id="contact">
             <div class="contact-card reveal">
                 <div>
-                    <p class="eyebrow">Contact</p>
-                    <h2>Let's build something technically solid and genuinely useful.</h2>
-                    <p>
+                    <p class="eyebrow" data-i18n="contact.eyebrow">Contact</p>
+                    <h2 data-i18n="contact.title">Let's build something technically solid and genuinely useful.</h2>
+                    <p data-i18n="contact.body">
                         I am open to software projects, engineering collaboration, and conversations around systems, web, mobile, databases, networking, and applied product work.
                     </p>
                 </div>
@@ -350,8 +382,9 @@
     </main>
 
     <footer class="site-footer">
-        <p>&copy; <span data-year></span> Ivan Matthias Sardon Medina. Built for GitHub Pages.</p>
-        <a href="#top">Back to top</a>
+        <p>&copy; <span data-year></span> Ivan Matthias Sardon Medina. <span data-i18n="footer.built">Built for GitHub Pages.</span></p>
+        <a href="#top" data-i18n="footer.top">Back to top</a>
     </footer>
+    <script src="i18n.js?v=1"></script>
 </body>
 </html>

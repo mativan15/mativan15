@@ -6,12 +6,19 @@
     <meta name="robots" content="noindex, follow">
     <meta http-equiv="refresh" content="0; url=index.html#contact">
     <link rel="canonical" href="https://mativan15.github.io/mativan15/">
-    <title>Redirecting to Ivan Sardon's Portfolio</title>
+    <title data-i18n="redirect.title">Redirecting to Ivan Sardon's Portfolio</title>
     <script>
-        window.location.replace("index.html#contact");
+        (function () {
+            var saved = "";
+            try { saved = localStorage.getItem("site-lang") || ""; } catch (e) {}
+            var fromUrl = new URLSearchParams(location.search).get("lang") || "";
+            var lang = (saved === "en" || saved === "pt" || saved === "es") ? saved : (fromUrl === "en" || fromUrl === "pt" || fromUrl === "es") ? fromUrl : "";
+            window.location.replace("index.html" + (lang ? "?lang=" + lang : "") + "#contact");
+        })();
     </script>
 </head>
 <body>
-    <p>This page has moved to <a href="index.html#contact">the Contact section of the portfolio</a>.</p>
+    <p data-i18n-html="redirect.contact">This page has moved to <a href="index.html#contact">the Contact section of the portfolio</a>.</p>
+    <script src="i18n.js?v=1"></script>
 </body>
 </html>
