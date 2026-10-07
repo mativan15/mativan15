@@ -697,7 +697,7 @@ if (pin && rig && canvas && canopyName && glCanvas && scrollScene) {
     const createLensGL = () => {
         const gl = glCanvas.getContext("webgl2", {
             alpha: true,
-            premultipliedAlpha: false,
+            premultipliedAlpha: true,
             antialias: false,
             depth: false,
             stencil: false
@@ -967,7 +967,7 @@ void main() {
     vec2 rel = frag - uLens;
     float cover = smoothstep(uRadius + 0.75, uRadius - 1.5, length(rel));
     if (cover <= 0.001) {
-        fragColor = vec4(beamRgb, beamA);
+        fragColor = vec4(beam.rgb, beamA);
         return;
     }
 
@@ -1085,7 +1085,7 @@ void main() {
 
     vec3 color = clamp(mix(beamRgb, glass, cover), 0.0, 0.97);
     float alpha = clamp(mix(beamA, 1.0, cover), 0.0, 1.0);
-    fragColor = vec4(color.r, color.g, color.b, alpha);
+    fragColor = vec4(color * alpha, alpha);
 }
 `;
 
@@ -1095,10 +1095,7 @@ out vec4 fragColor;
 uniform sampler2D uBeam;
 uniform vec2 uBuffer;
 void main() {
-    vec4 beam = texture(uBeam, gl_FragCoord.xy / uBuffer);
-    float beamA = beam.a;
-    vec3 beamRgb = beamA > 0.001 ? beam.rgb / beamA : vec3(0.0);
-    fragColor = vec4(beamRgb, beamA);
+    fragColor = texture(uBeam, gl_FragCoord.xy / uBuffer);
 }
 `;
 
