@@ -17,8 +17,7 @@ const siteRoot = import.meta.env.BASE_URL.endsWith("/")
 
             <div class="nav-end">
                 <div class="nav-links" id="primary-menu" data-nav-menu>
-                    <a href="#expertise" data-i18n="nav.expertise">Expertise</a>
-                    <a href="#projects" data-i18n="nav.projects">Projects</a>
+                    <a href="#work" data-i18n="nav.work">Work</a>
                     <a href="#about" data-i18n="nav.about">About</a>
                     <a href="#contact" data-i18n="nav.contact">Contact</a>
                 </div>
@@ -45,6 +44,7 @@ const siteRoot = import.meta.env.BASE_URL.endsWith("/")
             <div class="canopy-pin" id="canopy-pin">
                 <canvas class="canopy-field" id="canopy-field" aria-hidden="true"></canvas>
                 <canvas class="lens-gl" id="lens-gl" aria-hidden="true"></canvas>
+                <div class="canopy-copy">
                 <h1 class="canopy-name" id="canopy-name">
                     <span class="name-fill">
                         <span class="name-line">Ivan</span>
@@ -62,259 +62,78 @@ const siteRoot = import.meta.env.BASE_URL.endsWith("/")
                         <span class="name-line">Medina</span>
                     </span>
                 </h1>
+                <p class="canopy-line" data-i18n="canopy.line">Computer Science student at Universidad Católica San Pablo, in Arequipa, now on exchange at ICMC, Universidade de São Paulo, in São Carlos. I am open to collaborations.</p>
+                </div>
                 <p class="canopy-hint" data-i18n="hint">Move the pointer</p>
                 <div class="lens-rig" id="lens-rig"></div>
             </div>
         </section>
 
-        <section class="section compact" data-i18n-aria="profile.label" aria-label="Profile highlights">
-            <div class="metrics reveal">
-                <article>
-                    <span>2005</span>
-                    <p data-i18n="metric.born">Born in Arequipa, Peru</p>
-                </article>
-                <article>
-                    <span>UCSP</span>
-                    <p data-i18n="metric.student">Computer Science student since March 2023</p>
-                </article>
-                <article>
-                    <span>Top 100</span>
-                    <p data-i18n="metric.finalist">NASA Space Apps global finalist with AyniTech</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="section" id="expertise">
+        <section class="section" id="work">
             <div class="section-heading reveal">
-                <p class="eyebrow" data-i18n="expertise.eyebrow">Expertise spectrum</p>
-                <h2 data-i18n="expertise.title">One engineering mindset across very different application layers.</h2>
-                <p data-i18n="expertise.body">
-                    My work connects low-level implementation details with user-facing products: storage logic, indexing, sockets, command-line tools, backend architecture, web interfaces, mobile apps, and AI integration.
-                </p>
+                <h2 data-i18n="work.title">Selected work</h2>
+                <p data-i18n="work.intro">Three projects. The code is linked, and the note says what the program actually does.</p>
             </div>
-
-            <div class="spectrum reveal" data-i18n-aria="spectrum.label" aria-label="Low-level to high-level expertise">
-                <div class="spectrum-line" aria-hidden="true"></div>
-                <article>
-                    <span>01</span>
-                    <h3 data-i18n="spectrum.systems.title">Systems</h3>
-                    <p data-i18n="spectrum.systems.body">C, C++, memory, data structures, files, indexing, and performance-oriented programming.</p>
-                </article>
-                <article>
-                    <span>02</span>
-                    <h3 data-i18n="spectrum.network.title">Networking & UNIX</h3>
-                    <p data-i18n="spectrum.network.body">TCP/IP, sockets, Linux workflows, CLI tools, parsing, and automation-friendly utilities.</p>
-                </article>
-                <article>
-                    <span>03</span>
-                    <h3 data-i18n="spectrum.data.title">Backend & Data</h3>
-                    <p data-i18n="spectrum.data.body">Database concepts, scalable architecture, Firebase, MongoDB, MySQL, and API connectivity.</p>
-                </article>
-                <article>
-                    <span>04</span>
-                    <h3 data-i18n="spectrum.product.title">Web & Mobile</h3>
-                    <p data-i18n="spectrum.product.body">TypeScript, React, Next.js, Flutter, Swift, responsive UI, and production-oriented app design.</p>
-                </article>
-            </div>
-
-            <div class="tool-grid reveal" data-i18n-aria="tech.label" aria-label="Technologies">
-                <span>C++</span>
-                <span>C</span>
-                <span>TypeScript</span>
-                <span>JavaScript</span>
-                <span>Dart</span>
-                <span>Swift</span>
-                <span>Python</span>
-                <span>Java</span>
-                <span>React</span>
-                <span>Next.js</span>
-                <span>Node.js</span>
-                <span>Flutter</span>
-                <span>Firebase</span>
-                <span>Docker</span>
-                <span>Linux</span>
-                <span>Git</span>
-            </div>
-        </section>
-
-        <section class="section dark-band" id="projects">
-            <div class="section-heading invert reveal">
-                <p class="eyebrow" data-i18n="projects.eyebrow">Featured projects</p>
-                <h2 data-i18n="projects.title">Selected work that shows range, not just one stack.</h2>
-                <p data-i18n="projects.body">
-                    These projects are organized by the engineering capability they demonstrate, from database internals to mobile products and challenge-driven applications.
-                </p>
-            </div>
-
-            <div class="project-grid">
-                <article class="project-card feature reveal">
-                    <div class="project-topline">
-                        <span class="project-type" data-i18n="project.db.type">Database internals</span>
-                        <span class="project-index">01</span>
-                    </div>
-                    <h3 data-i18n="project.db.title">Custom Database Engine in C++</h3>
-                    <p data-i18n="project.db.body">
-                        Designed and implemented a storage simulation system focused on sparse and dense indexing, AVL-tree based indexing, bulk insertion from text files, and physical storage calculations.
+            <div class="work-list">
+                <article class="reveal">
+                    <h3 data-i18n="work.digits.title">Handwritten digits, in C++</h3>
+                    <p data-i18n="work.digits.body">I wrote a small vision transformer in C++17 that trains on MNIST and can read a photo of one digit. One build runs on the CPU. The CUDA build keeps the data and the weights on the GPU. In the same period, a class group of five, including me, trained a plain multilayer network on CUDA: 784 inputs, then 512, 256, 128, 64, and 10 digit scores. The same kind of network also exists for Apple GPUs.</p>
+                    <p class="work-links">
+                        <a href="https://github.com/mativan15/TransformerMNIST" target="_blank" rel="noreferrer">TransformerMNIST</a>
+                        <a href="https://github.com/mativan15/MLP-MNIST-CUDA" target="_blank" rel="noreferrer">MLP-MNIST-CUDA</a>
+                        <a href="https://github.com/mativan15/MLP-MNIST-Metal" target="_blank" rel="noreferrer">MLP-MNIST-Metal</a>
                     </p>
-                    <div class="tag-row">
-                        <span>C++</span>
-                        <span data-i18n="tag.structures">Data Structures</span>
-                        <span data-i18n="tag.indexing">Indexing</span>
-                        <span data-i18n="tag.files">File Systems</span>
-                    </div>
                 </article>
-
-                <article class="project-card reveal">
-                    <div class="project-topline">
-                        <span class="project-type" data-i18n="project.tcp.type">Networking</span>
-                        <span class="project-index">02</span>
-                    </div>
-                    <h3 data-i18n="project.tcp.title">TCP Scanner</h3>
-                    <p data-i18n="project.tcp.body">
-                        Socket-based network tooling project covering TCP communication, port scanning workflows, concurrent operations, and low-level analysis concepts.
+                <article class="reveal">
+                    <h3 data-i18n="work.nasa.title">RUNApp, with AyniTech</h3>
+                    <p data-i18n="work.nasa.body">In 2023 I was on AyniTech, a team from Universidad Católica San Pablo, at NASA Space Apps. RUNApp was an app about minerals and methane in the air over Arequipa, Lima, Trujillo, Piura, and Tacna. The team received an honorary mention and placed in the global top 100. It was not a global winner. The public code is two Flutter prototypes from that challenge, EMIT and a PACE learning app, and several screens in them are still unfinished.</p>
+                    <p class="work-links">
+                        <a href="https://github.com/mativan15/app_emit-SpaceApps2023" target="_blank" rel="noreferrer">EMIT</a>
+                        <a href="https://github.com/mativan15/PACE-ocean_NASA-space-apps" target="_blank" rel="noreferrer">PACE</a>
                     </p>
-                    <div class="tag-row">
-                        <span>C++</span>
-                        <span>TCP/IP</span>
-                        <span>Sockets</span>
-                    </div>
                 </article>
-
-                <article class="project-card reveal">
-                    <div class="project-topline">
-                        <span class="project-type" data-i18n="project.unix.type">UNIX tooling</span>
-                        <span class="project-index">03</span>
-                    </div>
-                    <h3 data-i18n="project.unix.title">UNIX Log Parser</h3>
-                    <p data-i18n="project.unix.body">
-                        CLI-oriented utility for structured log parsing, pattern extraction, UNIX workflow integration, and efficient text processing.
+                <article class="reveal">
+                    <h3 data-i18n="work.tools.title">A port scanner and a log parser</h3>
+                    <p data-i18n="work.tools.body">Two small C programs. The scanner takes a host and a range of ports and marks each port open, closed, or filtered. The parser reads a Unix install log, separates the process name from the message, counts how often each phrase appears, and prints the most common ones.</p>
+                    <p class="work-links">
+                        <a href="https://github.com/mativan15/TCP-scanner" target="_blank" rel="noreferrer">TCP-scanner</a>
+                        <a href="https://github.com/mativan15/log-parser-UNIX" target="_blank" rel="noreferrer">log-parser-UNIX</a>
                     </p>
-                    <div class="tag-row">
-                        <span>C++</span>
-                        <span>Linux</span>
-                        <span data-i18n="tag.parsing">Parsing</span>
-                    </div>
                 </article>
-
-                <article class="project-card reveal">
-                    <div class="project-topline">
-                        <span class="project-type" data-i18n="project.mobile.type">Mobile product</span>
-                        <span class="project-index">04</span>
-                    </div>
-                    <h3 data-i18n="project.mobile.title">Flutter Inventory & Work Order System</h3>
-                    <p data-i18n="project.mobile.body">
-                        Business-oriented mobile app with real-time product search, Firestore multi-filter querying, dynamic PDF generation, inventory workflows, and responsive Flutter UI.
-                    </p>
-                    <div class="tag-row">
-                        <span>Flutter</span>
-                        <span>Firebase</span>
-                        <span>Firestore</span>
-                        <span>PDF</span>
-                    </div>
-                </article>
-
-                <article class="project-card reveal">
-                    <div class="project-topline">
-                        <span class="project-type">NASA Space Apps</span>
-                        <span class="project-index">05</span>
-                    </div>
-                    <h3>RUNApp / AyniTech</h3>
-                    <p data-i18n="project.nasa.body">
-                        Educational Flutter app built for the EMIT for the Future challenge, using NASA mission data to explain health, community, and environmental impact in five Peruvian cities.
-                    </p>
-                    <div class="tag-row">
-                        <span>Dart</span>
-                        <span>Flutter</span>
-                        <span data-i18n="tag.nasa">NASA Data</span>
-                    </div>
-                </article>
-
-                <article class="project-card reveal">
-                    <div class="project-topline">
-                        <span class="project-type" data-i18n="project.clock.type">iOS + web</span>
-                        <span class="project-index">06</span>
-                    </div>
-                    <h3 data-i18n="project.clock.title">Digital Clock & Web Projects</h3>
-                    <p data-i18n="project.clock.body">
-                        Swift-based landscape iOS clock application distributed through TestFlight, plus responsive web applications using component-based architecture and API integration.
-                    </p>
-                    <div class="tag-row">
-                        <span>Swift</span>
-                        <span>iOS</span>
-                        <span>React</span>
-                        <span>Next.js</span>
-                    </div>
-                </article>
-            </div>
-
-            <div class="foundation-block reveal">
-                <div>
-                    <p class="eyebrow" data-i18n="foundations.eyebrow">Foundations</p>
-                    <h3 data-i18n="foundations.title">Early projects that shaped the base.</h3>
-                </div>
-                <div class="foundation-grid">
-                    <article>
-                        <h4>Lord Basilisk</h4>
-                        <p data-i18n="foundation.basilisk">Action RPG final group project that achieved the highest grade possible in the course history.</p>
-                    </article>
-                    <article>
-                        <h4 data-i18n="foundation.sales.title">Santillana Sales Dashboard</h4>
-                        <p data-i18n="foundation.sales.body">C++ OOP dashboard using dynamic memory allocation, inheritance, and polymorphism.</p>
-                    </article>
-                    <article>
-                        <h4 data-i18n="foundation.games.title">Classic C++ Games</h4>
-                        <p data-i18n="foundation.games.body">Snake and Tic Tac Toe console programs built as an introduction to C++ syntax and logic.</p>
-                    </article>
-                </div>
             </div>
         </section>
 
         <section class="section split" id="about">
             <div class="section-heading reveal">
-                <p class="eyebrow" data-i18n="about.eyebrow">About</p>
-                <h2 data-i18n="about.title">Curiosity, technical discipline, and creative range.</h2>
+                <h2 data-i18n="about.title">About</h2>
                 <figure class="about-portrait">
                     <img src={siteRoot + "myPhoto.jpg"} data-i18n-alt="about.alt" alt="Portrait of Ivan Matthias Sardon Medina" width="1800" height="2400" loading="lazy" decoding="async">
                 </figure>
             </div>
 
             <div class="about-copy reveal">
-                <p data-i18n="about.p1">
-                    I am Ivan Matthias Sardon Medina, a developer from Arequipa, Peru, focused on the path from data structures and networking to web and mobile products.
-                </p>
-                <p data-i18n="about.p2">
-                    I was born in Arequipa, Peru in 2005. In school, Mathematics, Computer Science, and English became early strengths, and after exploring engineering I found Computer Science at Universidad Católica San Pablo.
-                </p>
-                <p data-i18n="about.p3">
-                    I began studying Computer Science in March 2023. Since then, I have focused on strong academic performance while learning beyond coursework through talks, congresses, hackathons, and projects that force me to understand software at different levels.
-                </p>
-                <p data-i18n="about.p4">
-                    Outside software, I play piano, draw and paint across several media, train consistently, and enjoy volleyball and taekwondo. That creative side matters to my engineering work: I care about building products that are technically solid, usable, and thoughtfully designed.
-                </p>
+                <p data-i18n="about.p1">I am Ivan Matthias Sardon Medina. I have studied Computer Science at Universidad Católica San Pablo, in Arequipa, since March 2023. I am currently on exchange at ICMC, Universidade de São Paulo, in São Carlos.</p>
+                <p data-i18n="about.p2">I like software that has to be correct before it can be pretty: a training loop, a socket, a parser, and the screen a person actually uses.</p>
+                <p data-i18n="about.p3">I play piano, draw and paint, and train volleyball and taekwondo.</p>
             </div>
         </section>
 
         <section class="section contact-section" id="contact">
-            <div class="contact-card reveal">
-                <div>
-                    <p class="eyebrow" data-i18n="contact.eyebrow">Contact</p>
-                    <h2 data-i18n="contact.title">Let's build something technically solid and genuinely useful.</h2>
-                    <p data-i18n="contact.body">
-                        I am open to software projects, engineering collaboration, and conversations around systems, web, mobile, databases, networking, and applied product work.
-                    </p>
-                </div>
+            <div class="contact-block reveal">
+                <h2 data-i18n="contact.title">Contact</h2>
+                <p data-i18n="contact.body">I am open to collaborations. Email is the reliable way to reach me.</p>
                 <div class="contact-actions">
-                    <a class="button button-primary" href="mailto:ivan.sardon@ucsp.edu.pe">ivan.sardon@ucsp.edu.pe</a>
+                    <a class="button button-primary" href="mailto:matthiassardon@gmail.com">matthiassardon@gmail.com</a>
                     <a class="button button-secondary" href="https://github.com/mativan15" target="_blank" rel="noreferrer">GitHub</a>
                     <a class="button button-secondary" href="https://www.linkedin.com/in/iv%C3%A1n-sard%C3%B3n-medina-47b16329b" target="_blank" rel="noreferrer">LinkedIn</a>
-                    <a class="button button-secondary" href="https://www.instagram.com/mat.ivaan/" target="_blank" rel="noreferrer">Instagram</a>
                 </div>
             </div>
         </section>
     </main>
 
     <footer class="site-footer">
-        <p>&copy; <span data-year></span> Ivan Matthias Sardon Medina. <span data-i18n="footer.built">Built for GitHub Pages.</span></p>
+        <p>&copy; <span data-year></span> Ivan Matthias Sardon Medina</p>
+        <a href="https://www.instagram.com/mat.ivaan/" target="_blank" rel="noreferrer">Instagram</a>
         <a href="#top" data-i18n="footer.top">Back to top</a>
     </footer>
 </Layout>

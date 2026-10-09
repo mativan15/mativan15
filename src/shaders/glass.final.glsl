@@ -80,7 +80,7 @@ vec2 lensUv(vec2 fragPx, vec2 pinSize) {
     travelP = clamp(travelP, 0.0, uRadius * 3.0);
     vec3 hitP = exitP + outP * travelP;
     vec2 bentP = vec2(hitP.x / pinSize.x, hitP.y / pinSize.y);
-    float bendP = mix(0.08, 0.38, smoothstep(0.48, 0.9, ndP));
+    float bendP = mix(0.26, 0.48, smoothstep(0.68, 0.97, ndP));
     return mix(straightP, bentP, bendP);
 }
 float segDist(vec2 p, vec2 a, vec2 b) {
@@ -178,7 +178,7 @@ void main() {
     float dense = bodyAcc / (bodyAcc + 6.4);
     vec3 warm = vec3(0.98, 0.91, 0.78);
     vec3 lit = mix(vec3(0.93, 0.41, 0.06), warm, dense) * dense;
-    lit = mix(lit, warm * min(dense + 0.34, 0.94), spot * 0.58);
+    lit = mix(lit, warm * min(dense + 0.34, 0.94), spot * 0.58) * 0.9;
 
     float nd = length(rel) / max(uRadius, 1.0);
     float outerLip = smoothstep(0.968, 0.99, nd) * smoothstep(1.0, 0.997, nd);
@@ -202,7 +202,7 @@ void main() {
             wsum += w;
         }
     }
-    vec3 through = (glyph / wsum) * 0.48;
+    vec3 through = (glyph / wsum) * 0.16;
 
     float specSoft = pow(clamp(dot(specDir, vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 7.0);
     vec3 glass = through;

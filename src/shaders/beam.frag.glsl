@@ -125,5 +125,5 @@ void main() {
     acc *= uGain / 2.7;
     float dense = acc / (acc + 6.4);
     vec3 rgb = mix(vec3(0.93, 0.41, 0.06), vec3(0.98, 0.91, 0.78), dense);
-    fragColor = vec4(rgb * dense, dense);
+    fragColor = vec4(rgb * dense, dense) * 0.9;
 }

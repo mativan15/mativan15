@@ -1,29 +1,26 @@
 export const knows = {
     "en": [
-        "Software Engineering",
-        "Database Systems",
-        "Networking",
-        "UNIX Tools",
-        "Web Development",
-        "Mobile Development",
-        "Low-level Data Structures"
+        "C++",
+        "CUDA",
+        "Computer networking",
+        "UNIX tools",
+        "Flutter",
+        "Computer vision"
     ],
     "pt": [
-        "Engenharia de software",
-        "Sistemas de banco de dados",
-        "Redes",
+        "C++",
+        "CUDA",
+        "Redes de computadores",
         "Ferramentas UNIX",
-        "Desenvolvimento web",
-        "Desenvolvimento mobile",
-        "Estruturas de dados de baixo nível"
+        "Flutter",
+        "Visão computacional"
     ],
     "es": [
-        "Ingeniería de software",
-        "Sistemas de bases de datos",
-        "Redes",
+        "C++",
+        "CUDA",
+        "Redes de computadoras",
         "Herramientas UNIX",
-        "Desarrollo web",
-        "Desarrollo móvil",
-        "Estructuras de datos de bajo nivel"
+        "Flutter",
+        "Visión por computadora"
     ]
 } as const;
