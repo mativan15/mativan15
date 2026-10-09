@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, follow">
-    <meta http-equiv="refresh" content="0; url=index.html#contact">
+    <meta http-equiv="refresh" content="0; url=index.html">
     <link rel="canonical" href="https://mativan15.github.io/mativan15/">
     <title data-i18n="redirect.title">Redirecting to Ivan Sardon's Portfolio</title>
     <script>
@@ -13,12 +13,11 @@
             try { saved = localStorage.getItem("site-lang") || ""; } catch (e) {}
             var fromUrl = new URLSearchParams(location.search).get("lang") || "";
             var lang = (saved === "en" || saved === "pt" || saved === "es") ? saved : (fromUrl === "en" || fromUrl === "pt" || fromUrl === "es") ? fromUrl : "";
-            window.location.replace("index.html" + (lang ? "?lang=" + lang : "") + "#contact");
+            window.location.replace("index.html" + (lang ? "?lang=" + lang : ""));
         })();
     </script>
 </head>
 <body>
-    <p data-i18n-html="redirect.contact">This page has moved to <a href="index.html#contact">the Contact section of the portfolio</a>.</p>
-    <script src="i18n.js?v=1"></script>
+    <p data-i18n-html="redirect.home">This page has moved to <a href="index.html">the portfolio homepage</a>.</p>
 </body>
 </html>
