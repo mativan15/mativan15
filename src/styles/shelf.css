@@ -1,0 +1,692 @@
+section.shelf-section {
+    width: 100%;
+    max-width: none;
+    padding-top: 72px;
+    padding-bottom: 36px;
+    scroll-margin-top: 88px;
+}
+
+.shelf-section .section-heading,
+.shelf-filters,
+.shelf-caption,
+.shelf-hint {
+    width: var(--container);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.shelf-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: -18px;
+    margin-bottom: 4px;
+}
+
+.shelf-filters button {
+    border: 0;
+    background: transparent;
+    color: rgba(231, 225, 214, 0.42);
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 0;
+    cursor: pointer;
+}
+
+.shelf-filters button[aria-checked="true"] {
+    color: #e7e1d6;
+    box-shadow: inset 0 -1px 0 rgba(231, 225, 214, 0.8);
+}
+
+.shelf-stage {
+    position: relative;
+    height: min(50vh, 460px);
+    min-height: 320px;
+    perspective: 1700px;
+    perspective-origin: 50% 42%;
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+    --shade-a: 12%;
+    --shade-b: 20%;
+    --shade-c: 32%;
+    --shade-d: 46%;
+}
+
+.shelf-stage.is-drag {
+    cursor: grabbing;
+}
+
+.shelf-world {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(7deg);
+    transform-origin: 50% 58%;
+}
+
+.shelf-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        #07080a 0%,
+        rgba(7, 8, 10, 0.98) var(--shade-a),
+        rgba(7, 8, 10, 0.92) var(--shade-b),
+        rgba(7, 8, 10, 0.62) var(--shade-c),
+        rgba(7, 8, 10, 0) var(--shade-d),
+        rgba(7, 8, 10, 0) calc(100% - var(--shade-d)),
+        rgba(7, 8, 10, 0.62) calc(100% - var(--shade-c)),
+        rgba(7, 8, 10, 0.92) calc(100% - var(--shade-b)),
+        rgba(7, 8, 10, 0.98) calc(100% - var(--shade-a)),
+        #07080a 100%
+    );
+}
+
+.shelf-book {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    width: var(--w);
+    height: var(--h);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    margin-left: calc(var(--w) / -2);
+    margin-top: calc(var(--h) / -2);
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.shelf-book[hidden] {
+    display: none;
+}
+
+.shelf-shade {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -16px;
+    height: 22px;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
+    transform: rotateY(calc(var(--yaw) * -1deg));
+    pointer-events: none;
+}
+
+.shelf-mesh {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+}
+
+.shelf-face {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
+
+.shelf-front,
+.shelf-back {
+    width: var(--w);
+    height: var(--h);
+    margin-left: calc(var(--w) / -2);
+    margin-top: calc(var(--h) / -2);
+}
+
+.shelf-front {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 14px 12px 16px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    transform: translateZ(calc(var(--d) / 2));
+    backface-visibility: hidden;
+}
+
+.shelf-front::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(108deg, rgba(255, 255, 255, 0.2), transparent 36% 62%, rgba(0, 0, 0, 0.28));
+    pointer-events: none;
+}
+
+.shelf-front::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 12px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent);
+    pointer-events: none;
+}
+
+.shelf-front > * {
+    position: relative;
+    z-index: 1;
+}
+
+.shelf-back {
+    background: #161411;
+    transform: rotateY(180deg) translateZ(calc(var(--d) / 2));
+    backface-visibility: hidden;
+}
+
+.shelf-spine,
+.shelf-fore {
+    width: var(--d);
+    height: var(--h);
+    margin-left: calc(var(--d) / -2);
+    margin-top: calc(var(--h) / -2);
+}
+
+.shelf-spine {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--bg) 74%, black);
+    color: var(--ink);
+    transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+}
+
+.shelf-spine span {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--font);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.shelf-fore {
+    background: repeating-linear-gradient(
+        to bottom,
+        #f6f0e4 0 1px,
+        #e7dccb 1px 2px,
+        #d9cdb8 2px 3px
+    );
+    box-shadow: inset 10px 0 12px rgba(0, 0, 0, 0.28);
+    transform: rotateY(90deg) translateZ(calc(var(--w) / 2));
+}
+
+.shelf-top {
+    width: var(--w);
+    height: var(--d);
+    margin-left: calc(var(--w) / -2);
+    margin-top: calc(var(--d) / -2);
+    background: linear-gradient(#f3ecdf, #cfc3b0);
+    transform: rotateX(90deg) translateZ(calc(var(--h) / 2));
+}
+
+.shelf-kicker,
+.shelf-deck,
+.shelf-foot,
+.shelf-name {
+    margin: 0;
+}
+
+.shelf-kicker {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.shelf-deck {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.shelf-foot {
+    display: none;
+}
+
+.shelf-shot {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.shelf-layout-digit .shelf-kicker {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.02em;
+}
+
+.shelf-layout-digit .shelf-num {
+    position: absolute;
+    right: 12px;
+    top: 26px;
+    z-index: 0;
+    font-size: calc(var(--w) * 0.52);
+    line-height: 0.8;
+    color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.shelf-layout-digit .shelf-name {
+    margin-top: auto;
+    font-size: calc(var(--w) * 0.22);
+    font-style: italic;
+    font-weight: 560;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+}
+
+.shelf-layout-digit .shelf-deck {
+    margin-top: 8px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+}
+
+.shelf-layout-mlp .shelf-stack {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--accent);
+}
+
+.shelf-layout-mlp .shelf-name {
+    margin-top: auto;
+    font-size: calc(var(--w) * 0.28);
+    letter-spacing: -0.05em;
+    color: var(--accent);
+}
+
+.shelf-layout-emit {
+    align-items: center;
+    text-align: center;
+}
+
+.shelf-layout-emit .shelf-name {
+    margin-top: 36px;
+    font-size: calc(var(--w) * 0.24);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+}
+
+.shelf-layout-emit .shelf-deck {
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.shelf-layout-emit .shelf-strata {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: 54px;
+}
+
+.shelf-layout-emit .shelf-strata i:nth-child(1) { flex: 1; background: #8d9a62; }
+.shelf-layout-emit .shelf-strata i:nth-child(2) { flex: 1; background: #c6a15a; }
+.shelf-layout-emit .shelf-strata i:nth-child(3) { flex: 1.3; background: #6e4a38; }
+
+.shelf-layout-pace .shelf-horizon {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 46%;
+    background: radial-gradient(125% 100% at 50% 100%, #e7f6f6 0%, #8ec4cc 16%, #1d5c78 42%, transparent 68%);
+}
+
+.shelf-layout-pace .shelf-name {
+    margin-top: auto;
+    margin-bottom: 22%;
+    font-style: italic;
+    font-weight: 500;
+    font-size: calc(var(--w) * 0.28);
+}
+
+.shelf-layout-shop {
+    align-items: center;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px var(--accent), inset 0 0 0 8px var(--bg), inset 0 0 0 9px var(--accent);
+}
+
+.shelf-layout-shop .shelf-kicker {
+    letter-spacing: 0.42em;
+    margin-top: 18px;
+}
+
+.shelf-layout-shop .shelf-name {
+    margin-top: auto;
+    font-size: calc(var(--w) * 0.2);
+    font-style: italic;
+    line-height: 1;
+}
+
+.shelf-layout-shop .shelf-foot {
+    display: block;
+    margin: 12px 0 14px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.shelf-layout-clip {
+    justify-content: flex-end;
+}
+
+.shelf-layout-clip .shelf-badge {
+    position: absolute;
+    top: 22px;
+    left: 18px;
+    width: 46px;
+    height: 46px;
+    border: 1.5px solid var(--ink);
+    border-radius: 14px;
+}
+
+.shelf-layout-clip .shelf-badge::after {
+    content: "";
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    top: 15px;
+    height: 8px;
+    border-top: 1.5px solid var(--ink);
+    border-bottom: 1.5px solid var(--ink);
+}
+
+.shelf-layout-clip .shelf-name {
+    font-size: calc(var(--w) * 0.16);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+}
+
+.shelf-layout-term .shelf-name {
+    margin-top: 22px;
+    font-size: calc(var(--w) * 0.16);
+    letter-spacing: 0.04em;
+}
+
+.shelf-layout-term .shelf-deck {
+    margin-top: 14px;
+    white-space: pre-line;
+    font-size: 12px;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--accent) 78%, black);
+}
+
+.shelf-layout-term .shelf-lamp {
+    width: 9px;
+    height: 16px;
+    margin-top: auto;
+    background: var(--accent);
+}
+
+.shelf-layout-manual {
+    padding: 0;
+}
+
+.shelf-layout-manual .shelf-kicker {
+    background: #171717;
+    color: var(--bg);
+    padding: 9px 16px;
+    letter-spacing: 0.16em;
+}
+
+.shelf-layout-manual .shelf-name {
+    padding: 18px 16px 0;
+    font-size: calc(var(--w) * 0.24);
+}
+
+.shelf-layout-manual .shelf-deck {
+    padding: 8px 16px 0;
+}
+
+.shelf-layout-manual .shelf-rule {
+    margin-top: auto;
+    height: 10px;
+    background: #171717;
+}
+
+.shelf-layout-news .shelf-kicker {
+    color: var(--accent);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.shelf-layout-news .shelf-name {
+    margin-top: 8px;
+    font-size: calc(var(--w) * 0.22);
+    line-height: 0.86;
+}
+
+.shelf-layout-news .shelf-rule {
+    height: 4px;
+    margin: 8px 0;
+    background: var(--accent);
+}
+
+.shelf-layout-news .shelf-deck {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.shelf-layout-ledger .shelf-lines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0 23px,
+        rgba(180, 70, 70, 0.28) 23px 24px
+    );
+    pointer-events: none;
+}
+
+.shelf-layout-ledger .shelf-name {
+    margin-top: auto;
+    font-size: calc(var(--w) * 0.22);
+    font-style: italic;
+    line-height: 0.95;
+}
+
+.shelf-layout-cube {
+    padding: 0;
+}
+
+.shelf-layout-cube .shelf-stickers {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.shelf-layout-cube .shelf-stickers i:nth-child(1) { background: #c41e3a; }
+.shelf-layout-cube .shelf-stickers i:nth-child(2) { background: #f4f4f4; }
+.shelf-layout-cube .shelf-stickers i:nth-child(3) { background: #009b48; }
+.shelf-layout-cube .shelf-stickers i:nth-child(4) { background: #ffd500; }
+
+.shelf-layout-cube .shelf-name {
+    margin: 0;
+    padding: 11px 14px 13px;
+    background: #141414;
+    color: #f7f4ee;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+}
+
+.shelf-layout-neon .shelf-name {
+    margin-top: 42px;
+    font-size: calc(var(--w) * 0.145);
+    line-height: 1.15;
+    letter-spacing: 0.06em;
+}
+
+.shelf-layout-neon .shelf-l1,
+.shelf-layout-neon .shelf-l2 {
+    display: block;
+}
+
+.shelf-layout-neon .shelf-l1 {
+    color: transparent;
+    -webkit-text-stroke: 1px #5ce1e6;
+}
+
+.shelf-layout-neon .shelf-l2 {
+    color: #ff4f96;
+}
+
+.shelf-layout-neon .shelf-deck {
+    margin-top: auto;
+    font-family: "Outfit", sans-serif;
+}
+
+.shelf-layout-myth {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.shelf-layout-myth .shelf-kicker {
+    letter-spacing: 0.28em;
+    color: var(--accent);
+}
+
+.shelf-layout-myth .shelf-gem {
+    margin: 10px 0;
+    color: var(--accent);
+    letter-spacing: 0.3em;
+}
+
+.shelf-layout-myth .shelf-name {
+    font-size: calc(var(--w) * 0.16);
+    line-height: 1;
+}
+
+.shelf-layout-tank .shelf-name {
+    margin-top: 22px;
+    font-size: calc(var(--w) * 0.18);
+    line-height: 0.92;
+    color: var(--accent);
+    white-space: pre-line;
+}
+
+.shelf-layout-tank .shelf-band {
+    margin-top: auto;
+    height: 16px;
+    background: var(--accent);
+}
+
+.shelf-layout-poster .shelf-name {
+    margin-top: auto;
+    font-size: calc(var(--w) * 0.2);
+    line-height: 0.95;
+}
+
+.shelf-layout-poster .shelf-deck {
+    margin-top: 8px;
+}
+
+.shelf-caption {
+    text-align: center;
+    min-height: 9.5rem;
+}
+
+.shelf-eyebrow {
+    margin: 0;
+    color: rgba(231, 225, 214, 0.55);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.shelf-cap-title {
+    margin: 4px 0 0;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 560;
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.shelf-note {
+    max-width: 68ch;
+    margin: 8px auto 0;
+    color: rgba(231, 225, 214, 0.78);
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.shelf-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 18px;
+    margin-top: 12px;
+}
+
+.shelf-links a {
+    color: #e8a04a;
+    font-weight: 650;
+    text-underline-offset: 3px;
+}
+
+.shelf-hint {
+    margin-top: 14px;
+    margin-bottom: 0;
+    color: rgba(231, 225, 214, 0.42);
+    font-size: 12px;
+    text-align: center;
+}
+
+@media (max-width: 720px) {
+    section.shelf-section {
+        padding-top: 48px;
+        padding-bottom: 20px;
+    }
+
+    .shelf-stage {
+        height: 300px;
+        min-height: 280px;
+    }
+
+    .shelf-filters {
+        gap: 2px 12px;
+    }
+
+    .shelf-filters button {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+    }
+
+    .shelf-cap-title {
+        font-size: 22px;
+    }
+
+    .shelf-note {
+        font-size: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shelf-world {
+        transform: none;
+    }
+}

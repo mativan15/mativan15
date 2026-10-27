@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estante · Ivan Sardon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@600;700&family=Bebas+Neue&family=Black+Ops+One&family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Fraunces:ital,wght@0,560;1,560&family=IBM+Plex+Mono:wght@400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,wght@1,500&family=Orbitron:wght@600&family=Outfit:wght@500;700&family=Share+Tech+Mono&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      display: flex;
+      flex-direction: column;
+      background: #07080a;
+      color: #e7e1d6;
+      font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    }
+    .stage {
+      position: absolute;
+      inset: 0;
+      perspective: 1700px;
+      perspective-origin: 50% 46%;
+      overflow: hidden;
+      touch-action: none;
+      cursor: grab;
+    }
+    .stage.is-drag { cursor: grabbing; }
+    .world {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transform: rotateX(7deg);
+      transform-origin: 50% 58%;
+    }
+    .book {
+      position: absolute;
+      left: 50%;
+      top: 46%;
+      width: var(--w);
+      height: var(--h);
+      margin-left: calc(var(--w) / -2);
+      margin-top: calc(var(--h) / -2);
+      transform-style: preserve-3d;
+      background: none;
+      border: 0;
+      padding: 0;
+      color: inherit;
+      cursor: pointer;
+    }
+    .book:focus-visible .front {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+    .shade {
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: -16px;
+      height: 22px;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
+      transform: rotateY(calc(var(--yaw) * -1deg));
+      pointer-events: none;
+    }
+    .mesh {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+    }
+    .face {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-style: preserve-3d;
+    }
+    .front, .back {
+      width: var(--w);
+      height: var(--h);
+      margin-left: calc(var(--w) / -2);
+      margin-top: calc(var(--h) / -2);
+    }
+    .front {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 14px 12px 16px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      transform: translateZ(calc(var(--d) / 2));
+      backface-visibility: hidden;
+    }
+    .front::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(108deg, rgba(255, 255, 255, 0.2), transparent 36% 62%, rgba(0, 0, 0, 0.28));
+      pointer-events: none;
+    }
+    .front::after {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 12px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent);
+      pointer-events: none;
+    }
+    .front > * { position: relative; z-index: 1; }
+    .back {
+      background: #161411;
+      transform: rotateY(180deg) translateZ(calc(var(--d) / 2));
+      backface-visibility: hidden;
+    }
+    .spine, .fore {
+      width: var(--d);
+      height: var(--h);
+      margin-left: calc(var(--d) / -2);
+      margin-top: calc(var(--h) / -2);
+    }
+    .spine {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: color-mix(in srgb, var(--bg) 74%, black);
+      color: var(--ink);
+      transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+    }
+    .spine span {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: var(--font);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .fore {
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          #f6f0e4 0 1px,
+          #e7dccb 1px 2px,
+          #d9cdb8 2px 3px
+        );
+      box-shadow: inset 10px 0 12px rgba(0, 0, 0, 0.28);
+      transform: rotateY(90deg) translateZ(calc(var(--w) / 2));
+    }
+    .top {
+      width: var(--w);
+      height: var(--d);
+      margin-left: calc(var(--w) / -2);
+      margin-top: calc(var(--d) / -2);
+      background: linear-gradient(#f3ecdf, #cfc3b0);
+      transform: rotateX(90deg) translateZ(calc(var(--h) / 2));
+    }
+    .kicker, .deck, .foot, .title { margin: 0; }
+    .shot {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .kicker {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .deck { color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .foot { display: none; }
+
+    .layout-digit .kicker {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 9px;
+      letter-spacing: 0.02em;
+    }
+    .layout-digit .num {
+      position: absolute;
+      right: 12px;
+      top: 26px;
+      z-index: 0;
+      font-size: calc(var(--w) * 0.52);
+      line-height: 0.8;
+      color: transparent;
+      -webkit-text-stroke: 1.5px color-mix(in srgb, var(--ink) 40%, transparent);
+    }
+    .layout-digit .title {
+      margin-top: auto;
+      font-size: calc(var(--w) * 0.22);
+      font-style: italic;
+      font-weight: 560;
+      letter-spacing: -0.03em;
+      line-height: 0.9;
+    }
+    .layout-digit .deck {
+      margin-top: 8px;
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 10px;
+    }
+
+    .layout-mlp .stack {
+      list-style: none;
+      margin: 22px 0 0;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--accent);
+    }
+    .layout-mlp .title {
+      margin-top: auto;
+      font-size: calc(var(--w) * 0.3);
+      letter-spacing: -0.05em;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .layout-emit { align-items: center; text-align: center; }
+    .layout-emit .title {
+      margin-top: 36px;
+      font-size: calc(var(--w) * 0.26);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+    }
+    .layout-emit .deck { margin-top: 8px; letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; }
+    .layout-emit .strata {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 54px;
+    }
+    .layout-emit .strata i:nth-child(1) { flex: 1; background: #8d9a62; }
+    .layout-emit .strata i:nth-child(2) { flex: 1; background: #c6a15a; }
+    .layout-emit .strata i:nth-child(3) { flex: 1.3; background: #6e4a38; }
+
+    .layout-pace .horizon {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 46%;
+      background: radial-gradient(125% 100% at 50% 100%, #e7f6f6 0%, #8ec4cc 16%, #1d5c78 42%, transparent 68%);
+    }
+    .layout-pace .title {
+      margin-top: auto;
+      margin-bottom: 22%;
+      font-style: italic;
+      font-weight: 500;
+      font-size: calc(var(--w) * 0.3);
+      letter-spacing: -0.03em;
+    }
+
+    .layout-shop {
+      align-items: center;
+      text-align: center;
+      box-shadow: inset 0 0 0 1px var(--accent), inset 0 0 0 8px var(--bg), inset 0 0 0 9px var(--accent);
+    }
+    .layout-shop .kicker { letter-spacing: 0.46em; margin-top: 18px; }
+    .layout-shop .title {
+      margin-top: auto;
+      font-size: calc(var(--w) * 0.22);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1;
+    }
+    .layout-shop .foot {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 16px;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .layout-clip { justify-content: flex-end; }
+    .layout-clip .badge {
+      position: absolute;
+      top: 22px;
+      left: 18px;
+      width: 48px;
+      height: 48px;
+      border: 1.5px solid var(--ink);
+      border-radius: 14px;
+    }
+    .layout-clip .badge::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 16px;
+      height: 8px;
+      border-top: 1.5px solid var(--ink);
+      border-bottom: 1.5px solid var(--ink);
+    }
+    .layout-clip .title {
+      font-size: calc(var(--w) * 0.16);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+    }
+    .layout-clip .deck { margin-top: 6px; font-size: 12px; }
+
+    .layout-term .title {
+      margin-top: 28px;
+      font-size: calc(var(--w) * 0.17);
+      letter-spacing: 0.06em;
+      font-weight: 400;
+    }
+    .layout-term .deck {
+      margin-top: 16px;
+      white-space: pre-line;
+      font-size: 12px;
+      line-height: 1.7;
+      color: color-mix(in srgb, var(--accent) 78%, black);
+    }
+    .layout-term .lamp {
+      width: 9px;
+      height: 16px;
+      margin-top: auto;
+      background: var(--accent);
+    }
+
+    .layout-manual { padding: 0; }
+    .layout-manual .kicker {
+      background: #171717;
+      color: #f3e7c4;
+      padding: 9px 16px;
+      letter-spacing: 0.18em;
+    }
+    .layout-manual .title {
+      padding: 22px 16px 0;
+      font-size: calc(var(--w) * 0.28);
+      letter-spacing: -0.03em;
+    }
+    .layout-manual .deck { padding: 10px 16px 0; }
+    .layout-manual .rule {
+      margin-top: auto;
+      height: 10px;
+      background: #171717;
+    }
+
+    .layout-news .kicker {
+      color: var(--accent);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-weight: 500;
+    }
+    .layout-news .title {
+      margin-top: 10px;
+      font-size: calc(var(--w) * 0.24);
+      line-height: 0.84;
+      letter-spacing: 0.01em;
+    }
+    .layout-news .rule {
+      height: 4px;
+      margin: 10px 0 8px;
+      background: var(--accent);
+    }
+    .layout-news .deck { font-family: "Source Serif 4", Georgia, serif; font-size: 13px; color: var(--ink); }
+
+    .layout-ledger .lines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0 23px,
+        rgba(180, 70, 70, 0.28) 23px 24px
+      );
+      pointer-events: none;
+    }
+    .layout-ledger .title {
+      margin-top: auto;
+      font-size: calc(var(--w) * 0.24);
+      font-style: italic;
+      line-height: 0.95;
+    }
+    .layout-ledger .deck { margin-top: 8px; }
+
+    .layout-cube { padding: 0; }
+    .layout-cube .stickers {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .layout-cube .stickers i:nth-child(1) { background: #c41e3a; }
+    .layout-cube .stickers i:nth-child(2) { background: #f4f4f4; }
+    .layout-cube .stickers i:nth-child(3) { background: #009b48; }
+    .layout-cube .stickers i:nth-child(4) { background: #ffd500; }
+    .layout-cube .title {
+      margin: 0;
+      padding: 11px 14px 13px;
+      background: #141414;
+      color: #f7f4ee;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+    }
+
+    .layout-neon .title {
+      margin-top: 48px;
+      font-size: calc(var(--w) * 0.145);
+      line-height: 1.15;
+      letter-spacing: 0.06em;
+    }
+    .layout-neon .l1,
+    .layout-neon .l2 { display: block; }
+    .layout-neon .l1 {
+      color: transparent;
+      -webkit-text-stroke: 1px #5ce1e6;
+    }
+    .layout-neon .l2 { color: #ff4f96; }
+    .layout-neon .deck { margin-top: auto; color: #9a97a8; font-family: "Outfit", sans-serif; }
+
+    .layout-myth {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .layout-myth .kicker { letter-spacing: 0.42em; color: var(--accent); }
+    .layout-myth .gem { margin: 12px 0; color: var(--accent); font-size: 11px; letter-spacing: 0.4em; }
+    .layout-myth .title { font-size: calc(var(--w) * 0.18); font-weight: 600; line-height: 1; }
+
+    .layout-tank .title {
+      margin-top: 26px;
+      font-size: calc(var(--w) * 0.2);
+      line-height: 0.92;
+      letter-spacing: 0.02em;
+      color: var(--accent);
+      white-space: pre-line;
+    }
+    .layout-tank .deck { margin-top: 12px; color: color-mix(in srgb, var(--accent) 80%, black); }
+    .layout-tank .band {
+      margin-top: auto;
+      height: 16px;
+      background: var(--accent);
+    }
+
+    .dock {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
+      padding: 18px 24px 16px;
+      text-align: center;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(7, 8, 10, 0.92), rgba(7, 8, 10, 0));
+    }
+    .dock a { pointer-events: auto; }
+    .eyebrow {
+      margin: 0;
+      color: rgba(231, 225, 214, 0.55);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .cap-title {
+      margin: 4px 0 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 560;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+    .note {
+      max-width: 640px;
+      margin: 8px auto 0;
+      color: rgba(231, 225, 214, 0.78);
+      font-size: 14.5px;
+      line-height: 1.45;
+      min-height: 2.9em;
+    }
+    .links { margin: 10px 0 0; }
+    .links a {
+      color: #f3ecdf;
+      margin: 0 8px;
+      font-size: 13px;
+    }
+    .hint {
+      margin: 12px 0 0;
+      color: rgba(231, 225, 214, 0.42);
+      font-size: 12px;
+    }
+    @media (max-width: 720px) {
+      .cap-title { font-size: 22px; }
+      .note { font-size: 13px; }
+      .stage { min-height: 340px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .world { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" id="stage">
+    <div class="world" id="world"></div>
+  </main>
+  <footer class="dock">
+    <p class="eyebrow" id="eyebrow"></p>
+    <p class="cap-title" id="cap-title"></p>
+    <p class="note" id="cap-note"></p>
+    <p class="links" id="cap-links"></p>
+    <p class="hint">Arraste para folhear. Clique num livro abre o repositório. As setas do teclado também.</p>
+  </footer>
+  <script>
+    // image: null de propósito. Depois, um caminho de print entra aqui e a capa mostra a imagem no lugar do desenho.
+    const BOOKS = [
+      {
+        title: "Dígitos",
+        spine: "Dígitos",
+        kicker: "C++17 · CUDA",
+        deck: "à mão",
+        layout: "digit",
+        mark: '<span class="num">8</span>',
+        font: '"Fraunces", Georgia, serif',
+        bg: "#f3ecdf",
+        ink: "#221e18",
+        muted: "#6d665c",
+        accent: "#8c3a2f",
+        eyebrow: "Transformer MNIST",
+        note: "Vision transformer pequeno em C++17 que treina no MNIST e lê a foto de um dígito. Uma compilação roda na CPU. A compilação CUDA mantém os dados e os pesos na GPU.",
+        links: [{ label: "TransformerMNIST", href: "https://github.com/mativan15/TransformerMNIST" }],
+        image: null
+      },
+      {
+        title: "MLP",
+        spine: "MLP",
+        kicker: "CUDA · Metal",
+        deck: "rede de dígitos",
+        layout: "mlp",
+        mark: "<ol class=\"stack\"><li>784</li><li>512</li><li>256</li><li>128</li><li>64</li><li>10</li></ol>",
+        font: '"IBM Plex Mono", ui-monospace, monospace',
+        bg: "#17191c",
+        ink: "#e7d3c4",
+        muted: "#8d8278",
+        accent: "#d4845a",
+        eyebrow: "Rede multicamada",
+        note: "Rede para dígitos do MNIST: 784 entradas, depois 512, 256, 128, 64 e 10 pontuações. MLP-MNIST-CUDA é a versão NVIDIA. MLP-MNIST-Metal é a versão para GPUs da Apple.",
+        links: [
+          { label: "MLP-MNIST-CUDA", href: "https://github.com/mativan15/MLP-MNIST-CUDA" },
+          { label: "MLP-MNIST-Metal", href: "https://github.com/mativan15/MLP-MNIST-Metal" }
+        ],
+        image: null
+      },
+      {
+        title: "EMIT",
+        spine: "EMIT",
+        kicker: "Space Apps 2023",
+        deck: "cinco cidades",
+        layout: "emit",
+        mark: '<div class="strata"><i></i><i></i><i></i></div>',
+        font: '"Archivo Narrow", "Arial Narrow", sans-serif',
+        bg: "#1c463c",
+        ink: "#f0e6d2",
+        muted: "#d7c7a4",
+        accent: "#d7b56a",
+        eyebrow: "AyniTech · NASA",
+        note: "App sobre minerais e metano no ar de Arequipa, Lima, Trujillo, Piura e Tacna. Feito com a AyniTech no NASA Space Apps 2023. Menção honrosa e top 100 global. Não foi vencedor global. Várias telas do protótipo ainda estão incompletas.",
+        links: [{ label: "app_emit-SpaceApps2023", href: "https://github.com/mativan15/app_emit-SpaceApps2023" }],
+        image: null
+      },
+      {
+        title: "PACE",
+        spine: "PACE",
+        kicker: "NASA",
+        deck: "a missão no oceano",
+        layout: "pace",
+        mark: '<div class="horizon"></div>',
+        font: '"Newsreader", Georgia, serif',
+        bg: "#0b2740",
+        ink: "#e7f1f4",
+        muted: "#b7d0d4",
+        accent: "#9fd0d6",
+        eyebrow: "Protótipo Flutter",
+        note: "Protótipo em Flutter para aprender a missão PACE, do mesmo desafio. Várias telas ainda estão incompletas.",
+        links: [{ label: "PACE-ocean_NASA-space-apps", href: "https://github.com/mativan15/PACE-ocean_NASA-space-apps" }],
+        image: null
+      },
+      {
+        title: "Original",
+        spine: "Original",
+        kicker: "La",
+        deck: "",
+        foot: "Distribuidora",
+        layout: "shop",
+        mark: "",
+        font: '"Libre Baskerville", Georgia, serif',
+        bg: "#f7f1e6",
+        ink: "#6e2e24",
+        muted: "#8a5348",
+        accent: "#6e2e24",
+        eyebrow: "Flutter",
+        note: "App de inventário da La Original Distribuidora: estoque, estatísticas e notas de pedido.",
+        links: [{ label: "app_LaOriginalDistribuidora", href: "https://github.com/mativan15/app_LaOriginalDistribuidora" }],
+        image: null
+      },
+      {
+        title: "Clipboard",
+        spine: "Clipboard",
+        kicker: "Swift",
+        deck: "ProMax",
+        layout: "clip",
+        mark: '<div class="badge"></div>',
+        font: '"Outfit", ui-sans-serif, sans-serif',
+        bg: "#f3f3f5",
+        ink: "#1c1c1e",
+        muted: "#6e6e73",
+        accent: "#1c1c1e",
+        eyebrow: "iOS",
+        note: "App de área de transferência para iOS, em Swift.",
+        links: [{ label: "Clipboard-ProMax", href: "https://github.com/mativan15/Clipboard-ProMax" }],
+        image: null
+      },
+      {
+        title: "PORTAS",
+        spine: "Portas",
+        kicker: "TCP",
+        deck: "aberta\nfechada\nfiltrada",
+        layout: "term",
+        mark: '<div class="lamp"></div>',
+        font: '"Share Tech Mono", ui-monospace, monospace',
+        bg: "#0c120e",
+        ink: "#c8f5b4",
+        muted: "#7d9a72",
+        accent: "#7dff57",
+        eyebrow: "C",
+        note: "Programa em C. Recebe um host e um intervalo de portas e marca cada uma como aberta, fechada ou filtrada.",
+        links: [{ label: "TCP-scanner", href: "https://github.com/mativan15/TCP-scanner" }],
+        image: null
+      },
+      {
+        title: "Logs",
+        spine: "Logs",
+        kicker: "Unix",
+        deck: "as frases que se repetem",
+        layout: "manual",
+        mark: '<div class="rule"></div>',
+        font: '"Source Serif 4", Georgia, serif',
+        bg: "#f3e7c4",
+        ink: "#1a1a1a",
+        muted: "#3f3a32",
+        accent: "#1a1a1a",
+        eyebrow: "C",
+        note: "Programa em C. Abre um log de instalação do Unix, separa o nome do processo da mensagem, conta as frases e imprime as mais comuns.",
+        links: [{ label: "log-parser-UNIX", href: "https://github.com/mativan15/log-parser-UNIX" }],
+        image: null
+      },
+      {
+        title: "Catálogo",
+        spine: "Catálogo",
+        kicker: "C++",
+        deck: "boletas e pedidos",
+        layout: "ledger",
+        mark: '<div class="lines"></div>',
+        font: '"Cormorant Garamond", Georgia, serif',
+        bg: "#fbf6ea",
+        ink: "#1e2a44",
+        muted: "#5c6578",
+        accent: "#1e2a44",
+        eyebrow: "Windows e macOS",
+        note: "Programa em C++ com catálogo, produtos, pedidos, boletas e faturas. A versão Windows é a maior. Há outra pasta para macOS, com os mesmos tipos de arquivo.",
+        links: [
+          { label: "database_windows", href: "https://github.com/mativan15/database_windows" },
+          { label: "database_macOS", href: "https://github.com/mativan15/database_macOS" }
+        ],
+        image: null
+      },
+      {
+        title: "Tópicos",
+        spine: "Tópicos",
+        kicker: "EDA",
+        deck: "Space-Saving, num fluxo de documentos.",
+        layout: "news",
+        mark: '<div class="rule"></div>',
+        font: '"Bebas Neue", Impact, sans-serif',
+        bg: "#f6f3ec",
+        ink: "#141414",
+        muted: "#141414",
+        accent: "#c1121f",
+        eyebrow: "C++ e Flask",
+        note: "Projeto final de EDA. O backend em C++ resume um fluxo de documentos com o algoritmo Space-Saving. O frontend é Flask.",
+        links: [{ label: "TrendingTopicsAnalyzer", href: "https://github.com/mativan15/TrendingTopicsAnalyzer" }],
+        image: null
+      },
+      {
+        title: "CUBO",
+        spine: "Cubo",
+        kicker: "",
+        deck: "",
+        layout: "cube",
+        mark: '<div class="stickers"><i></i><i></i><i></i><i></i></div>',
+        font: '"Outfit", ui-sans-serif, sans-serif',
+        bg: "#111111",
+        ink: "#f7f4ee",
+        muted: "#f7f4ee",
+        accent: "#ffd500",
+        eyebrow: "OpenGL",
+        note: "Cubo de Rubik desenhado com OpenGL, em C++.",
+        links: [{ label: "RubickCube-OpenGL", href: "https://github.com/mativan15/RubickCube-OpenGL" }],
+        image: null
+      },
+      {
+        title: "Cyberpunk",
+        spine: "Cyber",
+        kicker: "",
+        deck: "câmera, céu, luz, um carro",
+        layout: "neon",
+        mark: "",
+        font: '"Orbitron", sans-serif',
+        bg: "#0c0c12",
+        ink: "#f2f2f6",
+        muted: "#9a97a8",
+        accent: "#5ce1e6",
+        eyebrow: "OpenGL",
+        note: "Cena 3D em C++ e OpenGL. No repositório há câmera, céu, luz e o modelo de um carro.",
+        links: [{ label: "CyberpunkScene-OpenGL", href: "https://github.com/mativan15/CyberpunkScene-OpenGL" }],
+        image: null
+      },
+      {
+        title: "Basilisk",
+        spine: "Basilisk",
+        kicker: "Lord",
+        deck: "",
+        layout: "myth",
+        mark: '<div class="gem">◆</div>',
+        font: '"Cinzel", Georgia, serif',
+        bg: "#2a1216",
+        ink: "#eadcc8",
+        muted: "#cbbba6",
+        accent: "#c6a15a",
+        eyebrow: "Python",
+        note: "Jogo em Python. O código tem jogador, inimigos, vida e um menu.",
+        links: [{ label: "lord_basilisk", href: "https://github.com/mativan15/lord_basilisk" }],
+        image: null
+      },
+      {
+        title: "TANK\nWARS",
+        spine: "Tanques",
+        kicker: "Elixir",
+        deck: "arcade em tempo real",
+        layout: "tank",
+        mark: '<div class="band"></div>',
+        font: '"Black Ops One", Impact, sans-serif',
+        bg: "#34392d",
+        ink: "#e6d3a3",
+        muted: "#cbb992",
+        accent: "#e6d3a3",
+        eyebrow: "Phoenix",
+        note: "Jogo em tempo real com Elixir, GenServer e Phoenix Channels. O README diz que começou como protótipo por turnos e passou a ser arcade.",
+        links: [{ label: "TankWars", href: "https://github.com/mativan15/TankWars" }],
+        image: null
+      }
+    ];
+
+    const world = document.getElementById("world");
+    const stage = document.getElementById("stage");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const nodes = [];
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[ch]);
+    }
+
+    function coverMarkup(book) {
+      const title = book.layout === "neon"
+        ? '<span class="l1">CYBER</span><span class="l2">PUNK</span>'
+        : escapeHtml(book.title);
+      const mark = book.image
+        ? '<img class="shot" alt="" src="' + escapeHtml(book.image) + '">'
+        : (book.mark || "");
+      const kicker = book.kicker ? '<p class="kicker">' + escapeHtml(book.kicker) + "</p>" : "";
+      const heading = '<p class="title">' + title + "</p>";
+      const deck = book.deck ? '<p class="deck">' + escapeHtml(book.deck) + "</p>" : "";
+      const foot = book.foot ? '<p class="foot">' + escapeHtml(book.foot) + "</p>" : "";
+      if (book.layout === "cube") return mark + heading;
+      if (book.layout === "manual" || book.layout === "term" || book.layout === "tank") {
+        return kicker + heading + deck + mark;
+      }
+      if (book.layout === "news") return kicker + heading + mark + deck;
+      if (book.layout === "myth" || book.layout === "mlp") return kicker + mark + heading + deck;
+      return mark + kicker + heading + deck + foot;
+    }
+
+    BOOKS.forEach((book, index) => {
+      const button = document.createElement("button");
+      button.className = "book";
+      button.type = "button";
+      button.dataset.i = String(index);
+      button.setAttribute("aria-label", book.title.replace("\n", " ") + ". " + book.note);
+      button.style.setProperty("--bg", book.bg);
+      button.style.setProperty("--ink", book.ink);
+      button.style.setProperty("--muted", book.muted);
+      button.style.setProperty("--accent", book.accent);
+      button.style.setProperty("--font", book.font);
+      button.innerHTML =
+        '<div class="shade"></div>' +
+        '<div class="mesh">' +
+          '<div class="face front layout-' + book.layout + '">' + coverMarkup(book) + "</div>" +
+          '<div class="face spine"><span>' + escapeHtml(book.spine) + "</span></div>" +
+          '<div class="face fore"></div>' +
+          '<div class="face top"></div>' +
+          '<div class="face back"></div>' +
+        "</div>";
+      world.appendChild(button);
+      nodes.push(button);
+    });
+
+    const metrics = () => {
+      const width = Math.max(118, Math.min(178, window.innerWidth * 0.15));
+      return {
+        w: width,
+        h: width * 1.5,
+        d: Math.max(26, width * 0.2),
+        step: width * 0.56,
+        gap: width * 0.64
+      };
+    };
+
+    let focus = 6;
+    let target = 6;
+    let shown = -1;
+    let drag = null;
+    let wheelTimer = 0;
+    let last = performance.now();
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function wrap(value) {
+      const count = BOOKS.length;
+      return ((value % count) + count) % count;
+    }
+
+    // The shelf is a loop, like the video: the book after the last one is the first.
+    function nearestTurn(index, from) {
+      const count = BOOKS.length;
+      let best = index;
+      let bestDistance = Infinity;
+      [index - count, index, index + count].forEach((candidate) => {
+        const distance = Math.abs(candidate - from);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = candidate;
+        }
+      });
+      return best;
+    }
+
+    function offset(index, from) {
+      let distance = index - from;
+      const count = BOOKS.length;
+      distance -= count * Math.round(distance / count);
+      return distance;
+    }
+
+    function pose(distance, size) {
+      const abs = Math.abs(distance);
+      const sign = distance < 0 ? -1 : distance > 0 ? 1 : 0;
+      const prominence = Math.exp(-abs * abs * 1.7);
+      const open = sign * size.gap * Math.min(abs, 1);
+      return {
+        x: distance * size.step + open,
+        y: -prominence * size.w * 0.08,
+        z: -abs * size.w * 0.22 + prominence * size.w * 0.55,
+        rot: clamp(-distance * 31, -58, 58),
+        scale: 0.94 + prominence * 0.16
+      };
+    }
+
+    function layout(now) {
+      const size = metrics();
+      world.style.setProperty("--w", size.w + "px");
+      world.style.setProperty("--h", size.h + "px");
+      world.style.setProperty("--d", size.d + "px");
+      nodes.forEach((node) => {
+        node.style.setProperty("--w", size.w + "px");
+        node.style.setProperty("--h", size.h + "px");
+        node.style.setProperty("--d", size.d + "px");
+      });
+
+      if (!reduce) {
+        const dt = Math.min(34, now - last);
+        focus += (target - focus) * (1 - Math.exp(-dt / 160));
+        if (Math.abs(target - focus) < 0.0008) focus = target;
+      } else {
+        focus = target;
+      }
+      last = now;
+
+      nodes.forEach((node, index) => {
+        const place = pose(offset(index, focus), size);
+        node.style.setProperty("--yaw", place.rot.toFixed(2));
+        node.style.transform =
+          "translate3d(" + place.x.toFixed(2) + "px, " + place.y.toFixed(2) + "px, " + place.z.toFixed(2) + "px) " +
+          "rotateY(" + place.rot.toFixed(2) + "deg) scale(" + place.scale.toFixed(3) + ")";
+        if (wrap(Math.round(focus)) === index) node.setAttribute("aria-current", "true");
+        else node.removeAttribute("aria-current");
+      });
+
+      const nearest = wrap(Math.round(focus));
+      if (nearest !== shown) {
+        shown = nearest;
+        const book = BOOKS[nearest];
+        document.getElementById("eyebrow").textContent = book.eyebrow;
+        document.getElementById("cap-title").textContent = book.title.replace("\n", " ");
+        document.getElementById("cap-note").textContent = book.note;
+        const links = document.getElementById("cap-links");
+        links.replaceChildren();
+        book.links.forEach((link) => {
+          const anchor = document.createElement("a");
+          anchor.href = link.href;
+          anchor.target = "_blank";
+          anchor.rel = "noreferrer";
+          anchor.textContent = link.label;
+          links.appendChild(anchor);
+        });
+      }
+    }
+
+    function openBook(index) {
+      const link = BOOKS[index].links[0];
+      const anchor = document.createElement("a");
+      anchor.href = link.href;
+      anchor.target = "_blank";
+      anchor.rel = "noreferrer";
+      anchor.click();
+    }
+
+    function bookUnder(clientX, clientY) {
+      const bounds = stage.getBoundingClientRect();
+      const y = (clientY - bounds.top) / bounds.height;
+      if (y < 0.2 || y > 0.88) return null;
+      let best = null;
+      let bestDistance = Infinity;
+      nodes.forEach((node, index) => {
+        const rect = node.getBoundingClientRect();
+        const center = rect.left + rect.width / 2;
+        const distance = Math.abs(center - clientX);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = index;
+        }
+      });
+      const current = wrap(Math.round(focus));
+      const currentRect = nodes[current].getBoundingClientRect();
+      const currentDistance = Math.abs(currentRect.left + currentRect.width / 2 - clientX);
+      if (best !== null && best !== current && bestDistance > currentDistance - 28) {
+        return nearestTurn(current, focus);
+      }
+      return best === null ? null : nearestTurn(best, focus);
+    }
+
+    stage.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      drag = {
+        x: event.clientX,
+        focus: target,
+        moved: false,
+        id: event.pointerId
+      };
+      try { stage.setPointerCapture(event.pointerId); } catch (error) {}
+    });
+
+    stage.addEventListener("pointermove", (event) => {
+      if (drag && drag.id === event.pointerId) {
+        const dx = event.clientX - drag.x;
+        if (Math.abs(dx) > 6) drag.moved = true;
+        if (drag.moved) {
+          stage.classList.add("is-drag");
+          const size = metrics();
+          target = drag.focus - dx / (size.step + size.gap * 0.2);
+        }
+        return;
+      }
+      const hit = bookUnder(event.clientX, event.clientY);
+      if (hit !== null) target = hit;
+    });
+
+    function endDrag(event) {
+      if (!drag || drag.id !== event.pointerId) return;
+      stage.classList.remove("is-drag");
+      if (drag.moved) {
+        target = Math.round(target);
+      } else {
+        const hit = event.target.closest(".book");
+        if (hit) openBook(Number(hit.dataset.i));
+      }
+      drag = null;
+    }
+
+    stage.addEventListener("pointerup", endDrag);
+    stage.addEventListener("pointercancel", endDrag);
+
+    stage.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      target += delta / 260;
+      window.clearTimeout(wheelTimer);
+      wheelTimer = window.setTimeout(() => {
+        if (!drag) target = Math.round(target);
+      }, 160);
+    }, { passive: false });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      const step = event.key === "ArrowRight" ? 1 : -1;
+      target = Math.round(target) + step;
+    });
+
+    window.addEventListener("resize", () => layout(performance.now()));
+
+    function frame(now) {
+      layout(now);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

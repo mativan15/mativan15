@@ -69,38 +69,33 @@ const siteRoot = import.meta.env.BASE_URL.endsWith("/")
             </div>
         </section>
 
-        <section class="section" id="work">
+        <section class="section shelf-section" id="work">
             <div class="section-heading reveal">
                 <h2 data-i18n="work.title">Selected work</h2>
-                <p data-i18n="work.intro">Three projects. The code is linked, and the note says what the program actually does.</p>
+                <p data-i18n="work.intro">One book for each repository. The note says what the program actually does.</p>
             </div>
-            <div class="work-list">
-                <article class="reveal">
-                    <h3 data-i18n="work.digits.title">Handwritten digits, in C++</h3>
-                    <p data-i18n="work.digits.body">I wrote a small vision transformer in C++17 that trains on MNIST and can read a photo of one digit. One build runs on the CPU. The CUDA build keeps the data and the weights on the GPU. In the same period, a class group of five, including me, trained a plain multilayer network on CUDA: 784 inputs, then 512, 256, 128, 64, and 10 digit scores. The same kind of network also exists for Apple GPUs.</p>
-                    <p class="work-links">
-                        <a href="https://github.com/mativan15/TransformerMNIST" target="_blank" rel="noreferrer">TransformerMNIST</a>
-                        <a href="https://github.com/mativan15/MLP-MNIST-CUDA" target="_blank" rel="noreferrer">MLP-MNIST-CUDA</a>
-                        <a href="https://github.com/mativan15/MLP-MNIST-Metal" target="_blank" rel="noreferrer">MLP-MNIST-Metal</a>
-                    </p>
-                </article>
-                <article class="reveal">
-                    <h3 data-i18n="work.nasa.title">RUNApp, with AyniTech</h3>
-                    <p data-i18n="work.nasa.body">In 2023 I was on AyniTech, a team from Universidad Católica San Pablo, at NASA Space Apps. RUNApp was an app about minerals and methane in the air over Arequipa, Lima, Trujillo, Piura, and Tacna. The team received an honorary mention and placed in the global top 100. It was not a global winner. The public code is two Flutter prototypes from that challenge, EMIT and a PACE learning app, and several screens in them are still unfinished.</p>
-                    <p class="work-links">
-                        <a href="https://github.com/mativan15/app_emit-SpaceApps2023" target="_blank" rel="noreferrer">EMIT</a>
-                        <a href="https://github.com/mativan15/PACE-ocean_NASA-space-apps" target="_blank" rel="noreferrer">PACE</a>
-                    </p>
-                </article>
-                <article class="reveal">
-                    <h3 data-i18n="work.tools.title">A port scanner and a log parser</h3>
-                    <p data-i18n="work.tools.body">Two small C programs. The scanner takes a host and a range of ports and marks each port open, closed, or filtered. The parser reads a Unix install log, separates the process name from the message, counts how often each phrase appears, and prints the most common ones.</p>
-                    <p class="work-links">
-                        <a href="https://github.com/mativan15/TCP-scanner" target="_blank" rel="noreferrer">TCP-scanner</a>
-                        <a href="https://github.com/mativan15/log-parser-UNIX" target="_blank" rel="noreferrer">log-parser-UNIX</a>
-                    </p>
-                </article>
+            <div class="shelf-filters" role="radiogroup" data-shelf-filters data-i18n-aria="shelf.filters" aria-label="Filter projects">
+                <button type="button" role="radio" data-shelf-filter="all" data-i18n="shelf.filter.all" aria-checked="true" tabindex="0">All</button>
+                <button type="button" role="radio" data-shelf-filter="networks" data-i18n="shelf.filter.networks" aria-checked="false" tabindex="-1">Networks</button>
+                <button type="button" role="radio" data-shelf-filter="backend" data-i18n="shelf.filter.backend" aria-checked="false" tabindex="-1">Backend</button>
+                <button type="button" role="radio" data-shelf-filter="mobile" data-i18n="shelf.filter.mobile" aria-checked="false" tabindex="-1">Mobile</button>
+                <button type="button" role="radio" data-shelf-filter="web" data-i18n="shelf.filter.web" aria-checked="false" tabindex="-1">Web</button>
+                <button type="button" role="radio" data-shelf-filter="graphics" data-i18n="shelf.filter.graphics" aria-checked="false" tabindex="-1">Graphics</button>
+                <button type="button" role="radio" data-shelf-filter="games" data-i18n="shelf.filter.games" aria-checked="false" tabindex="-1">Games</button>
+                <button type="button" role="radio" data-shelf-filter="models" data-i18n="shelf.filter.models" aria-checked="false" tabindex="-1">Models</button>
+                <button type="button" role="radio" data-shelf-filter="systems" data-i18n="shelf.filter.systems" aria-checked="false" tabindex="-1">Systems</button>
+                <button type="button" role="radio" data-shelf-filter="security" data-i18n="shelf.filter.security" aria-checked="false" tabindex="-1">Security</button>
             </div>
+            <div class="shelf-stage" data-shelf-stage data-i18n-aria="shelf.stage" aria-label="Project shelf">
+                <div class="shelf-world" data-shelf-world></div>
+            </div>
+            <div class="shelf-caption">
+                <p class="shelf-eyebrow" data-shelf-eyebrow></p>
+                <p class="shelf-cap-title" data-shelf-title></p>
+                <p class="shelf-note" data-shelf-note></p>
+                <p class="shelf-links" data-shelf-links></p>
+            </div>
+            <p class="shelf-hint" data-i18n="shelf.hint">It keeps turning. Rest the pointer on either side to turn that way. A click opens the book in front.</p>
         </section>
 
         <section class="section split" id="about">

@@ -133,6 +133,7 @@ function setLanguage(next: string, persist: boolean): void {
     }
 
     applyLanguage();
+    document.dispatchEvent(new CustomEvent("site-lang", { detail: current }));
 
     if (persist && changed) {
         const status = document.querySelector("[data-lang-status]");
@@ -219,6 +220,7 @@ function reportMissingCopy(): void {
 }
 
 export interface SiteI18n {
+    readonly lang: string;
     t: (key: string) => string;
 }
 

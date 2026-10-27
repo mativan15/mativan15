@@ -1,3 +1,5 @@
+@import "./shelf.css";
+
 :root {
     color-scheme: dark;
     --bg: #111413;
@@ -1551,3 +1553,4 @@ h3 {
 .about .section-heading h2 {
     color: #E7E1D6;
 }
+
