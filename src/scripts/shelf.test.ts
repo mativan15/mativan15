@@ -9,7 +9,7 @@ import {
     SHELF_CRUISE_RATE,
     SHELF_IDLE_RATE,
     SHELF_MIN_LOOP,
-    SHELF_SHADE,
+    SHELF_SHADE_OPEN,
     loopRepeats,
     shelfCruise,
     shelfShade,
@@ -174,17 +174,37 @@ describe("shelf motion", () => {
         expect(Math.abs(edge.x)).toBeGreaterThan(size.w * 4);
     });
 
-    it("keeps the same shadow for a long row and tightens it when repeats would show", () => {
+    it("dims a full row lightly and keeps the tight spotlight when copies would show", () => {
         const wide = shelfMetrics(1800);
-        expect(shelfShade(42, 1800, wide)).toEqual(SHELF_SHADE);
-        expect(shelfShade(4, 390, shelfMetrics(390)).a).toBe(SHELF_SHADE.a);
+        expect(shelfShade(42, 1800, wide)).toEqual(SHELF_SHADE_OPEN);
+        expect(shelfShade(4, 390, shelfMetrics(390))).toEqual(SHELF_SHADE_OPEN);
 
         const four = shelfShade(4, 1800, wide);
         const two = shelfShade(2, 1800, wide);
-        expect(four.d).toBe(SHELF_SHADE.d);
-        expect(four.a).toBeGreaterThan(SHELF_SHADE.b);
+        expect(four.edge).toBe(1);
+        expect(four.d).toBe(46);
+        expect(four.a).toBeGreaterThan(26);
+        expect(two.edge).toBe(1);
         expect(two.a).toBeGreaterThan(four.a);
         expect(two.a).toBeLessThan(two.d);
+        expect(SHELF_SHADE_OPEN.edge).toBeLessThan(0.5);
+    });
+
+    it("opens the shadow as books are added and closes it as they are removed", () => {
+        [390, 800, 1200, 1680].forEach((width) => {
+            const size = shelfMetrics(width);
+            let previous = shelfShade(2, width, size).edge;
+            for (let count = 3; count <= 24; count += 1) {
+                const next = shelfShade(count, width, size).edge;
+                expect(next).toBeLessThanOrEqual(previous + 0.001);
+                previous = next;
+            }
+            const full = shelfShade(42, width, size);
+            const pair = shelfShade(2, width, size);
+            expect(full).toEqual(SHELF_SHADE_OPEN);
+            expect(pair.edge).toBeGreaterThanOrEqual(full.edge);
+            expect(shelfShade(1, width, size)).toEqual(SHELF_SHADE_OPEN);
+        });
     });
 
     it("keeps a phone book narrow enough that neighbors can peek", () => {

@@ -79,32 +79,71 @@ export const SHELF_IDLE_RATE = 0.135;
 /** Books per second while the pointer rests on one side. The rate does not change with time. */
 export const SHELF_CRUISE_RATE = 1.092;
 
-/** The shadow stops used when the row is long enough that repeats stay in the dark. */
-export const SHELF_SHADE = { a: 12, b: 20, c: 32, d: 46 };
+export interface ShelfShade {
+    edge: number;
+    a: number;
+    aAlpha: number;
+    b: number;
+    bAlpha: number;
+    c: number;
+    cAlpha: number;
+    d: number;
+}
+
+/** Light edge dimming. Used when unique books already fill the stage, so nothing needs to be hidden. */
+export const SHELF_SHADE_OPEN: ShelfShade = {
+    edge: 0.2,
+    a: 4,
+    aAlpha: 0.12,
+    b: 9,
+    bAlpha: 0.06,
+    c: 16,
+    cAlpha: 0.02,
+    d: 24
+};
 
 /**
- * Shadow stops, as percentages from the left edge.
- * A long row keeps the same stops. A short row pulls the dark inward
- * until the repeated copy of a book sits under it, without narrowing the clear center.
+ * Shadow across the stage.
+ * Stops are percentages from the left edge. Alphas are how solid the page color is.
+ * A long row only dims the edges. A short row keeps the tight black spotlight,
+ * pulled in until the repeated copy sits under it.
  */
-export function shelfShade(count: number, stageWidth: number, size: ShelfMetrics): { a: number; b: number; c: number; d: number } {
-    const base = SHELF_SHADE;
+export function shelfShade(count: number, stageWidth: number, size: ShelfMetrics): ShelfShade {
     if (count <= 1 || stageWidth <= 0) {
-        return { ...base };
+        return { ...SHELF_SHADE_OPEN };
     }
     const duplicateInner = count * size.step + size.gap - size.w * 0.7;
     const fromLeft = 50 - (duplicateInner / stageWidth) * 100;
-    if (fromLeft <= base.b) {
-        return { ...base };
+    if (fromLeft <= 12) {
+        return { ...SHELF_SHADE_OPEN };
     }
-    const a = clamp(fromLeft, base.a, 42);
-    const span = base.d - a;
-    const baseSpan = base.d - base.a;
-    return {
+    const a = clamp(fromLeft, 12, 42);
+    const d = 46;
+    const span = d - a;
+    const tight: ShelfShade = {
+        edge: 1,
         a,
-        b: a + ((base.b - base.a) / baseSpan) * span,
-        c: a + ((base.c - base.a) / baseSpan) * span,
-        d: base.d
+        aAlpha: 0.98,
+        b: a + (8 / 34) * span,
+        bAlpha: 0.92,
+        c: a + (20 / 34) * span,
+        cAlpha: 0.62,
+        d
+    };
+    if (fromLeft >= 26) {
+        return tight;
+    }
+    const blend = (fromLeft - 12) / (26 - 12);
+    const mix = (open: number, closed: number): number => open + (closed - open) * blend;
+    return {
+        edge: mix(SHELF_SHADE_OPEN.edge, tight.edge),
+        a: mix(SHELF_SHADE_OPEN.a, tight.a),
+        aAlpha: mix(SHELF_SHADE_OPEN.aAlpha, tight.aAlpha),
+        b: mix(SHELF_SHADE_OPEN.b, tight.b),
+        bAlpha: mix(SHELF_SHADE_OPEN.bAlpha, tight.bAlpha),
+        c: mix(SHELF_SHADE_OPEN.c, tight.c),
+        cAlpha: mix(SHELF_SHADE_OPEN.cAlpha, tight.cAlpha),
+        d: mix(SHELF_SHADE_OPEN.d, tight.d)
     };
 }
 

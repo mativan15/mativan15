@@ -49,10 +49,14 @@ section.shelf-section {
     overflow: hidden;
     touch-action: pan-y;
     cursor: grab;
-    --shade-a: 12%;
-    --shade-b: 20%;
-    --shade-c: 32%;
-    --shade-d: 46%;
+    --shade-edge: 0.2;
+    --shade-a: 4%;
+    --shade-a-alpha: 0.12;
+    --shade-b: 9%;
+    --shade-b-alpha: 0.06;
+    --shade-c: 16%;
+    --shade-c-alpha: 0.02;
+    --shade-d: 24%;
 }
 
 .shelf-stage.is-drag {
@@ -75,16 +79,16 @@ section.shelf-section {
     pointer-events: none;
     background: linear-gradient(
         90deg,
-        #07080a 0%,
-        rgba(7, 8, 10, 0.98) var(--shade-a),
-        rgba(7, 8, 10, 0.92) var(--shade-b),
-        rgba(7, 8, 10, 0.62) var(--shade-c),
+        rgba(7, 8, 10, var(--shade-edge)) 0%,
+        rgba(7, 8, 10, var(--shade-a-alpha)) var(--shade-a),
+        rgba(7, 8, 10, var(--shade-b-alpha)) var(--shade-b),
+        rgba(7, 8, 10, var(--shade-c-alpha)) var(--shade-c),
         rgba(7, 8, 10, 0) var(--shade-d),
         rgba(7, 8, 10, 0) calc(100% - var(--shade-d)),
-        rgba(7, 8, 10, 0.62) calc(100% - var(--shade-c)),
-        rgba(7, 8, 10, 0.92) calc(100% - var(--shade-b)),
-        rgba(7, 8, 10, 0.98) calc(100% - var(--shade-a)),
-        #07080a 100%
+        rgba(7, 8, 10, var(--shade-c-alpha)) calc(100% - var(--shade-c)),
+        rgba(7, 8, 10, var(--shade-b-alpha)) calc(100% - var(--shade-b)),
+        rgba(7, 8, 10, var(--shade-a-alpha)) calc(100% - var(--shade-a)),
+        rgba(7, 8, 10, var(--shade-edge)) 100%
     );
 }
 

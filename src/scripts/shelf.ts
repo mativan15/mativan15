@@ -391,9 +391,13 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         world.style.setProperty("--h", `${size.h}px`);
         world.style.setProperty("--d", `${size.d}px`);
         const shade = shelfShade(count, bounds.width, size);
+        stage.style.setProperty("--shade-edge", shade.edge.toFixed(3));
         stage.style.setProperty("--shade-a", `${shade.a.toFixed(2)}%`);
+        stage.style.setProperty("--shade-a-alpha", shade.aAlpha.toFixed(3));
         stage.style.setProperty("--shade-b", `${shade.b.toFixed(2)}%`);
+        stage.style.setProperty("--shade-b-alpha", shade.bAlpha.toFixed(3));
         stage.style.setProperty("--shade-c", `${shade.c.toFixed(2)}%`);
+        stage.style.setProperty("--shade-c-alpha", shade.cAlpha.toFixed(3));
         stage.style.setProperty("--shade-d", `${shade.d.toFixed(2)}%`);
 
         const dt = Math.min(34, now - last);
