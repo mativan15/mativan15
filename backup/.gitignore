@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.astro/
+public/boot.js
+public/boot.js.map
+.DS_Store

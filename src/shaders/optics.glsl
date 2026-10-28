@@ -1,6 +1,6 @@
 
-const float ETA_IN = 1.0 / 1.52;
-const float ETA_OUT = 1.52;
+#define ETA_IN (1.0 / uIor)
+#define ETA_OUT (uIor)
 
 vec2 sphereHits(vec3 origin, vec3 dir, vec3 center, float radius) {
     vec3 oc = origin - center;

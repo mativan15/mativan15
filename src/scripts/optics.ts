@@ -41,14 +41,15 @@ export const sphereHits = (origin: Vec3, dir: Vec3, center: Vec3, radius: number
     return [-b - s, -b + s];
 };
 
-export const transmit = (origin: Vec3, dir: Vec3, center: Vec3, radius: number): Transmission | null => {
+export const transmit = (origin: Vec3, dir: Vec3, center: Vec3, radius: number, ior = 1.52): Transmission | null => {
+    const glass = ior > 1 ? ior : 1.52;
     const span = sphereHits(origin, dir, center, radius);
     if (!span || span[0] < 0.001) {
         return null;
     }
     const entry = add3(origin, mul3(dir, span[0]));
     const normalIn = norm3(sub3(entry, center));
-    let into = refract3(dir, normalIn, 1 / 1.52);
+    let into = refract3(dir, normalIn, 1 / glass);
     if (!into) {
         return null;
     }
@@ -63,7 +64,7 @@ export const transmit = (origin: Vec3, dir: Vec3, center: Vec3, radius: number):
     }
     let exitPoint = add3(entry, mul3(into, tBack));
     const normalOut = norm3(sub3(center, exitPoint));
-    let outgoing = refract3(into, normalOut, 1.52);
+    let outgoing = refract3(into, normalOut, glass);
     if (!outgoing) {
         const bounced = norm3(reflect3(into, normalOut));
         const spanC = sphereHits(add3(exitPoint, bounced), bounced, center, radius);
@@ -76,7 +77,7 @@ export const transmit = (origin: Vec3, dir: Vec3, center: Vec3, radius: number):
         }
         const third = add3(exitPoint, mul3(bounced, tExit));
         const normalThird = norm3(sub3(center, third));
-        outgoing = refract3(bounced, normalThird, 1.52);
+        outgoing = refract3(bounced, normalThird, glass);
         if (!outgoing) {
             return null;
         }
@@ -85,14 +86,26 @@ export const transmit = (origin: Vec3, dir: Vec3, center: Vec3, radius: number):
     return { entry, exitPoint, outgoing: norm3(outgoing) };
 };
 
+export interface RayTune {
+    ior?: number;
+    steer?: number;
+    spread?: number;
+    focus?: number;
+}
+
 export const landingsAt = (
     lensX: number,
     lensY: number,
     radius: number,
     light: { x: number; y: number; z: number },
     viewHeight: number,
-    nameX: number
+    nameX: number,
+    tune?: RayTune
 ): number[] => {
+    const ior = tune?.ior ?? 1.52;
+    const steer = tune?.steer ?? 0.6;
+    const spread = tune?.spread ?? 0.36;
+    const focus = tune?.focus ?? 0.72;
     const center: Vec3 = [lensX, viewHeight - lensY, 0];
     const lamp: Vec3 = [light.x, viewHeight - light.y, light.z];
     const axis = norm3(sub3(center, lamp));
@@ -104,16 +117,15 @@ export const landingsAt = (
     for (let i = 0; i < count; i += 1) {
         const fi = i + 0.5;
         const ang = fi * 2.39996323;
-        const rad = Math.sqrt(fi / count) * radius * 0.36;
+        const rad = Math.sqrt(fi / count) * radius * spread;
         const sample = add3(center, add3(mul3(tx, Math.cos(ang) * rad), mul3(ty, Math.sin(ang) * rad)));
-        const target = add3(center, mul3(axis, radius * 0.72));
+        const target = add3(center, mul3(axis, radius * focus));
         const dir = norm3(sub3(target, sample));
         const origin = sub3(sample, mul3(dir, radius * 5));
-        const hit = transmit(origin, dir, center, radius);
+        const hit = transmit(origin, dir, center, radius, ior);
         if (!hit || hit.outgoing[0] > -0.02) {
             continue;
         }
-        const steer = 0.60;
         const axis2raw = [axis[0], -axis[1]];
         const axis2len = Math.hypot(axis2raw[0], axis2raw[1]) || 1;
         const axis2 = [axis2raw[0] / axis2len, axis2raw[1] / axis2len];

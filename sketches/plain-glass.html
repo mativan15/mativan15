@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plain glass</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #07080A; }
+    body {
+      color: #E7E1D6;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
+    .stage { position: relative; height: 100%; overflow: hidden; background: #07080A; touch-action: none; }
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .note {
+      position: absolute;
+      z-index: 2;
+      left: 20px;
+      bottom: 16px;
+      margin: 0;
+      color: rgba(231, 225, 214, 0.45);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <canvas id="field"></canvas>
+    <canvas id="glass"></canvas>
+    <p class="note">Plain glass. Separate from the site lens. Drag it.</p>
+  </div>
+  <script>
+    // This file does not import the hero lens. Changing it leaves the site alone.
+    const stage = document.getElementById("stage");
+    const field = document.getElementById("field");
+    const glass = document.getElementById("glass");
+    const ctx = field.getContext("2d");
+    const gl = glass.getContext("webgl2", {
+      alpha: true,
+      premultipliedAlpha: true,
+      antialias: false,
+      depth: false,
+      stencil: false
+    });
+
+    const glyphs = ["{", "}", "(", ")", ";", "->", "=>", "0x", "[", "]", "fn", "#", "&", "*", "/", "="];
+    const lens = { x: 0, y: 0, r: 140 };
+    let symbols = [];
+
+    const vertexSource = `#version 300 es
+layout(location = 0) in vec2 aPos;
+void main() {
+  gl_Position = vec4(aPos, 0.0, 1.0);
+}`;
+
+    const fragmentSource = `#version 300 es
+precision highp float;
+out vec4 fragColor;
+uniform vec2 uSize;
+uniform vec2 uLens;
+uniform float uRadius;
+uniform sampler2D uField;
+
+const float IOR = 1.52;
+const float BEND_NEAR = 0.26;
+const float BEND_FAR = 0.48;
+const float THROUGH = 0.78;
+
+const float ETA_IN = 1.0 / IOR;
+const float ETA_OUT = IOR;
+
+vec2 sphereHits(vec3 origin, vec3 dir, vec3 center, float radius) {
+  vec3 oc = origin - center;
+  float b = dot(oc, dir);
+  float c = dot(oc, oc) - radius * radius;
+  float h = b * b - c;
+  if (h < 0.0) return vec2(-1.0);
+  float s = sqrt(h);
+  return vec2(-b - s, -b + s);
+}
+
+bool transmit(vec3 origin, vec3 dir, vec3 center, float radius, out vec3 entry, out vec3 exitPoint, out vec3 outgoing) {
+  vec2 span = sphereHits(origin, dir, center, radius);
+  if (span.x < 0.001) return false;
+  entry = origin + dir * span.x;
+  vec3 normalIn = normalize(entry - center);
+  vec3 into = refract(dir, normalIn, ETA_IN);
+  if (dot(into, into) < 1.0e-8) return false;
+  into = normalize(into);
+  vec2 spanB = sphereHits(entry + into, into, center, radius);
+  float tBack = max(spanB.x, spanB.y);
+  if (tBack < 0.01) return false;
+  exitPoint = entry + into * tBack;
+  vec3 normalOut = normalize(center - exitPoint);
+  outgoing = refract(into, normalOut, ETA_OUT);
+  if (dot(outgoing, outgoing) < 1.0e-8) {
+    vec3 bounced = normalize(reflect(into, normalOut));
+    vec2 spanC = sphereHits(exitPoint + bounced, bounced, center, radius);
+    float tExit = max(spanC.x, spanC.y);
+    if (tExit < 0.01) return false;
+    vec3 third = exitPoint + bounced * tExit;
+    vec3 normalThird = normalize(center - third);
+    outgoing = refract(bounced, normalThird, ETA_OUT);
+    if (dot(outgoing, outgoing) < 1.0e-8) return false;
+    exitPoint = third;
+  }
+  outgoing = normalize(outgoing);
+  return true;
+}
+
+vec2 bentUv(vec2 frag) {
+  vec3 center = vec3(uLens, 0.0);
+  vec2 rel = frag - uLens;
+  float nd = length(rel) / max(uRadius, 1.0);
+  vec2 straight = vec2(frag.x / uSize.x, (uSize.y - frag.y) / uSize.y);
+  vec3 cam = vec3(frag, uRadius * 3.2);
+  vec3 entry;
+  vec3 exitPoint;
+  vec3 outgoing;
+  if (!transmit(cam, vec3(0.0, 0.0, -1.0), center, uRadius, entry, exitPoint, outgoing)) {
+    return straight;
+  }
+  float travel = abs(outgoing.z) > 0.02 ? (-uRadius * 1.15 - exitPoint.z) / outgoing.z : 0.0;
+  travel = clamp(travel, 0.0, uRadius * 3.0);
+  vec3 hit = exitPoint + outgoing * travel;
+  vec2 bent = vec2(hit.x / uSize.x, (uSize.y - hit.y) / uSize.y);
+  float bend = mix(BEND_NEAR, BEND_FAR, smoothstep(0.68, 0.97, nd));
+  return mix(straight, bent, bend);
+}
+
+void main() {
+  vec2 frag = vec2(gl_FragCoord.x, uSize.y - gl_FragCoord.y);
+  vec2 rel = frag - uLens;
+  float dist = length(rel);
+  float cover = smoothstep(uRadius + 0.75, uRadius - 1.5, dist);
+  if (cover <= 0.001) {
+    fragColor = vec4(0.0);
+    return;
+  }
+
+  float z = sqrt(max(uRadius * uRadius - dot(rel, rel), 0.0));
+  vec3 surf = vec3(frag, z);
+  vec3 normal = normalize(surf - vec3(uLens, 0.0));
+  vec3 lightDir = normalize(vec3(0.45, 0.28, 0.85));
+  float fres = pow(1.0 - clamp(dot(normal, vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 2.5);
+  float nd = dist / max(uRadius, 1.0);
+  float outerLip = smoothstep(0.968, 0.99, nd) * smoothstep(1.0, 0.997, nd);
+  float innerCatch = smoothstep(0.93, 0.952, nd) * smoothstep(0.972, 0.958, nd);
+  float groove = smoothstep(0.952, 0.968, nd) * smoothstep(0.986, 0.972, nd);
+  float lightSide = pow(clamp(dot(normal, lightDir), 0.0, 1.0), 0.55);
+  float rim = outerLip * mix(0.06, 0.74, lightSide) + innerCatch * mix(0.012, 0.11, lightSide) + fres * mix(0.01, 0.07, lightSide);
+
+  vec2 suv = bentUv(frag);
+  vec2 dx = dFdx(suv);
+  vec2 dy = dFdy(suv);
+  vec3 sampleColor = vec3(0.0);
+  float weight = 0.0;
+  for (int gy = -1; gy <= 1; gy++) {
+    for (int gx = -1; gx <= 1; gx++) {
+      vec2 tap = vec2(float(gx), float(gy));
+      float w = exp(-dot(tap, tap) * 0.62);
+      sampleColor += texture(uField, clamp(suv + (dx * tap.x + dy * tap.y) * 1.8, 0.0, 1.0)).rgb * w;
+      weight += w;
+    }
+  }
+
+  vec3 color = (sampleColor / weight) * THROUGH;
+  color *= mix(1.0, 0.9, groove);
+  color += vec3(0.04, 0.025, 0.012) * lightSide * 0.35;
+  color += vec3(0.96, 0.97, 0.99) * rim;
+  color = clamp(color, 0.0, 0.97);
+  fragColor = vec4(color * cover, cover);
+}`;
+
+    const compile = (type, source, label) => {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const log = gl.getShaderInfoLog(shader) || label;
+        gl.deleteShader(shader);
+        throw new Error(label + ": " + log);
+      }
+      return shader;
+    };
+
+    const program = gl.createProgram();
+    gl.attachShader(program, compile(gl.VERTEX_SHADER, vertexSource, "vertex"));
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragmentSource, "glass"));
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error(gl.getProgramInfoLog(program) || "link");
+    }
+    gl.useProgram(program);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+    const texture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.uniform1i(gl.getUniformLocation(program, "uField"), 0);
+    const uSize = gl.getUniformLocation(program, "uSize");
+    const uLens = gl.getUniformLocation(program, "uLens");
+    const uRadius = gl.getUniformLocation(program, "uRadius");
+
+    const random = (seed) => {
+      let state = seed >>> 0;
+      return () => {
+        state = Math.imul(state ^ (state >>> 15), state | 1);
+        state ^= state + Math.imul(state ^ (state >>> 7), state | 61);
+        return ((state ^ (state >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+
+    const buildSymbols = (width, height) => {
+      const next = random(20261028);
+      const count = Math.round((width * height) / 9000);
+      symbols = [];
+      for (let i = 0; i < count; i += 1) {
+        symbols.push({
+          text: glyphs[i % glyphs.length],
+          x: next() * width,
+          y: next() * height,
+          size: 11 + next() * 7,
+          amber: i % 6 === 0,
+          alpha: 0.35 + next() * 0.45
+        });
+      }
+    };
+
+    const paintField = () => {
+      const width = field.width;
+      const height = field.height;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = "#07080A";
+      ctx.fillRect(0, 0, width, height);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      symbols.forEach((item) => {
+        ctx.globalAlpha = item.alpha;
+        ctx.fillStyle = item.amber ? "#E8A04A" : "#E7E1D6";
+        ctx.font = item.size.toFixed(1) + "px ui-monospace, SFMono-Regular, Menlo, monospace";
+        ctx.fillText(item.text, item.x, item.y);
+      });
+      ctx.globalAlpha = 1;
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, field);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    };
+
+    const resize = () => {
+      const width = Math.max(1, stage.clientWidth);
+      const height = Math.max(1, stage.clientHeight);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      field.width = Math.round(width * dpr);
+      field.height = Math.round(height * dpr);
+      glass.width = field.width;
+      glass.height = field.height;
+      lens.r = Math.round(Math.min(Math.max(Math.min(width, height) * 0.16, 96), 168) * dpr);
+      if (lens.x < lens.r || lens.x > field.width - lens.r) lens.x = field.width * 0.62;
+      if (lens.y < lens.r || lens.y > field.height - lens.r) lens.y = field.height * 0.46;
+      buildSymbols(field.width, field.height);
+      paintField();
+      draw();
+    };
+
+    const draw = () => {
+      gl.viewport(0, 0, glass.width, glass.height);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(program);
+      gl.uniform2f(uSize, glass.width, glass.height);
+      gl.uniform2f(uLens, lens.x, lens.y);
+      gl.uniform1f(uRadius, lens.r);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+
+    let dragging = false;
+    const place = (event) => {
+      const rect = stage.getBoundingClientRect();
+      const dpr = field.width / Math.max(1, rect.width);
+      lens.x = (event.clientX - rect.left) * dpr;
+      lens.y = (event.clientY - rect.top) * dpr;
+      draw();
+    };
+    stage.addEventListener("pointerdown", (event) => {
+      dragging = true;
+      stage.setPointerCapture(event.pointerId);
+      place(event);
+    });
+    stage.addEventListener("pointermove", (event) => {
+      if (dragging) place(event);
+    });
+    stage.addEventListener("pointerup", () => {
+      dragging = false;
+    });
+    stage.addEventListener("pointercancel", () => {
+      dragging = false;
+    });
+
+    window.addEventListener("resize", resize);
+    try {
+      resize();
+    } catch (error) {
+      document.querySelector(".note").textContent = error instanceof Error ? error.message : String(error);
+    }
+  </script>
+</body>
+</html>

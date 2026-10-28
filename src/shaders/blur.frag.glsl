@@ -4,8 +4,9 @@ in vec2 vUv;
 out vec4 fragColor;
 uniform sampler2D uTex;
 uniform vec2 uDirection;
+uniform float uBlur;
 void main() {
-    float sigma = 1.3;
+    float sigma = max(uBlur, 0.05);
     vec4 sum = vec4(0.0);
     float weight = 0.0;
     for (int i = -5; i <= 5; i++) {

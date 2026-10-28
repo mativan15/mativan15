@@ -1,0 +1,134 @@
+---
+import Layout from "../layouts/Layout.astro";
+const siteRoot = import.meta.env.BASE_URL.endsWith("/")
+    ? import.meta.env.BASE_URL
+    : `${import.meta.env.BASE_URL}/`;
+---
+<Layout>
+
+    <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+    <header class="site-header" data-header>
+        <nav class="nav-shell" data-i18n-aria="nav.primary" aria-label="Primary navigation">
+            <a class="brand" href="#top" data-i18n-aria="brand.home" aria-label="Ivan Sardon home">
+                <span class="brand-mark">IS</span>
+                <span>Ivan Sardon</span>
+            </a>
+
+            <div class="nav-end">
+                <div class="nav-links" id="primary-menu" data-nav-menu>
+                    <a href="#work" data-i18n="nav.work">Work</a>
+                    <a href="#about" data-i18n="nav.about">About</a>
+                    <a href="#contact" data-i18n="nav.contact">Contact</a>
+                </div>
+
+                <div class="lang-switch" role="radiogroup" data-i18n-aria="lang.label" aria-label="Language">
+                    <button type="button" role="radio" data-set-lang="en" lang="en" aria-label="English" aria-checked="true" tabindex="0">EN</button>
+                    <button type="button" role="radio" data-set-lang="pt" lang="pt" aria-label="Português" aria-checked="false" tabindex="-1">PT</button>
+                    <button type="button" role="radio" data-set-lang="es" lang="es" aria-label="Español" aria-checked="false" tabindex="-1">ES</button>
+                </div>
+
+                <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-menu" data-nav-toggle>
+                    <span class="sr-only" data-i18n="nav.open" data-i18n-expanded="nav.close">Open navigation</span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+        <p class="sr-only" data-lang-status aria-live="polite"></p>
+    </header>
+
+    <main id="main">
+        <section class="canopy-scroll" id="top" aria-label="Ivan Sardon Medina">
+            <div class="canopy-pin" id="canopy-pin">
+                <canvas class="canopy-field" id="canopy-field" aria-hidden="true"></canvas>
+                <canvas class="lens-gl" id="lens-gl" aria-hidden="true"></canvas>
+                <div class="canopy-copy">
+                <h1 class="canopy-name" id="canopy-name">
+                    <span class="name-fill">
+                        <span class="name-line">Ivan</span>
+                        <span class="name-line">Sardon</span>
+                        <span class="name-line">Medina</span>
+                    </span>
+                    <span class="name-rim" aria-hidden="true">
+                        <span class="name-line">Ivan</span>
+                        <span class="name-line">Sardon</span>
+                        <span class="name-line">Medina</span>
+                    </span>
+                    <span class="name-beam" aria-hidden="true">
+                        <span class="name-line">Ivan</span>
+                        <span class="name-line">Sardon</span>
+                        <span class="name-line">Medina</span>
+                    </span>
+                </h1>
+                <p class="canopy-line" data-i18n="canopy.line">Computer Science student at Universidad Católica San Pablo, in Arequipa, now on exchange at ICMC, Universidade de São Paulo, in São Carlos. I am open to collaborations.</p>
+                </div>
+                <p class="canopy-hint" data-i18n="hint">Move the pointer</p>
+                <div class="lens-rig" id="lens-rig"></div>
+            </div>
+        </section>
+
+        <section class="section shelf-section" id="work">
+            <div class="section-heading reveal">
+                <h2 data-i18n="work.title">Selected work</h2>
+                <p data-i18n="work.intro">One book for each repository. The note says what the program actually does.</p>
+            </div>
+            <div class="shelf-filters" role="radiogroup" data-shelf-filters data-i18n-aria="shelf.filters" aria-label="Filter projects">
+                <button type="button" role="radio" data-shelf-filter="all" data-i18n="shelf.filter.all" aria-checked="true" tabindex="0">All</button>
+                <button type="button" role="radio" data-shelf-filter="networks" data-i18n="shelf.filter.networks" aria-checked="false" tabindex="-1">Networks</button>
+                <button type="button" role="radio" data-shelf-filter="backend" data-i18n="shelf.filter.backend" aria-checked="false" tabindex="-1">Backend</button>
+                <button type="button" role="radio" data-shelf-filter="mobile" data-i18n="shelf.filter.mobile" aria-checked="false" tabindex="-1">Mobile</button>
+                <button type="button" role="radio" data-shelf-filter="web" data-i18n="shelf.filter.web" aria-checked="false" tabindex="-1">Web</button>
+                <button type="button" role="radio" data-shelf-filter="graphics" data-i18n="shelf.filter.graphics" aria-checked="false" tabindex="-1">Graphics</button>
+                <button type="button" role="radio" data-shelf-filter="games" data-i18n="shelf.filter.games" aria-checked="false" tabindex="-1">Games</button>
+                <button type="button" role="radio" data-shelf-filter="models" data-i18n="shelf.filter.models" aria-checked="false" tabindex="-1">Models</button>
+                <button type="button" role="radio" data-shelf-filter="systems" data-i18n="shelf.filter.systems" aria-checked="false" tabindex="-1">Systems</button>
+                <button type="button" role="radio" data-shelf-filter="security" data-i18n="shelf.filter.security" aria-checked="false" tabindex="-1">Security</button>
+            </div>
+            <div class="shelf-stage" data-shelf-stage data-i18n-aria="shelf.stage" aria-label="Project shelf">
+                <div class="shelf-world" data-shelf-world></div>
+            </div>
+            <div class="shelf-caption">
+                <p class="shelf-eyebrow" data-shelf-eyebrow></p>
+                <p class="shelf-cap-title" data-shelf-title></p>
+                <p class="shelf-note" data-shelf-note></p>
+                <p class="shelf-links" data-shelf-links></p>
+            </div>
+            <p class="shelf-hint" data-i18n="shelf.hint">It keeps turning. Click a book to bring it to the center. Click the center book to open it.</p>
+        </section>
+
+        <section class="section split" id="about">
+            <div class="section-heading reveal">
+                <h2 data-i18n="about.title">About</h2>
+                <figure class="about-portrait">
+                    <img src={siteRoot + "myPhoto.jpg"} data-i18n-alt="about.alt" alt="Portrait of Ivan Matthias Sardon Medina" width="1800" height="2400" loading="lazy" decoding="async">
+                </figure>
+            </div>
+
+            <div class="about-copy reveal">
+                <p data-i18n="about.p1">I am Ivan Matthias Sardon Medina. I have studied Computer Science at Universidad Católica San Pablo, in Arequipa, since March 2023. I am currently on exchange at ICMC, Universidade de São Paulo, in São Carlos.</p>
+                <p data-i18n="about.p2">I like software that has to be correct before it can be pretty: a training loop, a socket, a parser, and the screen a person actually uses.</p>
+                <p data-i18n="about.p3">I play piano, draw and paint, and train volleyball and taekwondo.</p>
+            </div>
+        </section>
+
+        <section class="section contact-section" id="contact">
+            <div class="contact-block reveal">
+                <h2 data-i18n="contact.title">Contact</h2>
+                <p data-i18n="contact.body">I am open to collaborations. Email is the reliable way to reach me.</p>
+                <div class="contact-actions">
+                    <a class="button button-primary" href="mailto:matthiassardon@gmail.com">matthiassardon@gmail.com</a>
+                    <a class="button button-secondary" href="https://github.com/mativan15" target="_blank" rel="noreferrer">GitHub</a>
+                    <a class="button button-secondary" href="https://www.linkedin.com/in/iv%C3%A1n-sard%C3%B3n-medina-47b16329b" target="_blank" rel="noreferrer">LinkedIn</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; <span data-year></span> Ivan Matthias Sardon Medina</p>
+        <a href="https://www.instagram.com/mat.ivaan/" target="_blank" rel="noreferrer">Instagram</a>
+        <a href="#top" data-i18n="footer.top">Back to top</a>
+    </footer>
+</Layout>

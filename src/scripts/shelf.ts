@@ -18,9 +18,7 @@ import {
     wrapIndex,
     type ShelfMetrics
 } from "./shelf-motion";
-
-const TAU_MS = 170;
-const CLICK_GLIDE_MS = 75;
+import { flag, n } from "./visual-tune";
 
 function copyOf(book: ShelfBook, lang: ShelfLang): ShelfCopy {
     return book.copy[lang];
@@ -247,7 +245,7 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
     let velocity = 0;
     let pointerSide: number | null = null;
     let glide: number | null = null;
-    let glideMs = TAU_MS;
+    let glideMs = n("shelf.arrowMs");
     let releaseAt: { x: number; y: number } | null = null;
     let last = performance.now();
     let drag: { x: number; y: number; focus: number; moved: boolean; id: number; axis: "" | "x" | "y" } | null = null;
@@ -425,9 +423,9 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
                     glide = null;
                 }
             }
-        } else if (!reducedMotion) {
+        } else if (!reducedMotion && !flag("shelf.pause")) {
             const desired = shelfCruise(releaseAt ? null : pointerSide, reducedMotion);
-            velocity += (desired - velocity) * (1 - Math.exp(-dt / 120));
+            velocity += (desired - velocity) * (1 - Math.exp(-dt / n("shelf.ease")));
             focus += velocity * (dt / 1000);
         }
         if (count > 1 && Math.abs(focus) > count * 4) {
@@ -611,11 +609,11 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
             // A side book rushes to the center. The book already there opens.
             const size = shelfMetrics(stage.getBoundingClientRect().width);
             const hit = bookUnder(event.clientX, event.clientY, size);
-            if (hit && Math.abs(hit.turn - focus) < 0.45) {
+            if (hit && Math.abs(hit.turn - focus) < n("shelf.openDistance")) {
                 openBook(hit.source);
             } else if (hit) {
                 glide = hit.turn;
-                glideMs = CLICK_GLIDE_MS;
+                glideMs = n("shelf.clickMs");
                 velocity = 0;
                 releaseAt = { x: event.clientX, y: event.clientY };
             }
@@ -635,7 +633,7 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         if (count <= 1) {
             return;
         }
-        focus += event.deltaX / 420;
+        focus += event.deltaX / n("shelf.wheel");
         glide = null;
         releaseAt = null;
     }, { passive: false });
@@ -659,7 +657,7 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         event.preventDefault();
         const step = event.key === "ArrowRight" ? 1 : -1;
         glide = Math.round(focus) + step;
-        glideMs = TAU_MS;
+        glideMs = n("shelf.arrowMs");
         velocity = 0;
         releaseAt = null;
     });

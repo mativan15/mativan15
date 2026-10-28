@@ -2,9 +2,10 @@
 // Mechanical port of the previous intro. The refraction and placement math live in typed modules.
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { landingsAt } from "./optics";
+import { focusLandings } from "./biconvex";
 import { shaderSources } from "./shaders";
-import { headerOffset, lensFrame, nameClearance, scrollHeight } from "./stage";
+import { headerOffset, lensFrame, lensYaw, nameClearance, scrollHeight } from "./stage";
+import { c, flag, n, onTune, tuneGeneration, tuneVec3 } from "./visual-tune";
 
 interface GlyphItem {
     nx: number;
@@ -48,11 +49,11 @@ export function startIntro(reducedMotion: boolean): void {
     const glyphSet = ["{", "}", "(", ")", ";", "->", "=>", "0x", "[", "]", "fn", "#", "&", "*", "/", "="];
     const ctx = canvas.getContext("2d");
     const mouse = { x: -9999, y: -9999, on: false, vx: 0, vy: 0 };
-    const beamGain = 2.7;
     const GLYPH_SIZE_COUNT = 31;
     let glyphs: GlyphItem[] = [];
     let glyphAtlas: { sheet: HTMLCanvasElement; cell: number; dpr: number } | null = null;
     let scrollProgress = reducedMotion ? 1 : 0;
+    let lensYawRad = 0;
     let lensGL: { render: (scene: LensScene, moved: boolean) => void } | null = null;
     let lastOptics: number[] | null = null;
 
@@ -94,7 +95,7 @@ export function startIntro(reducedMotion: boolean): void {
         actx.clearRect(0, 0, cols * cell, rows * cell);
         actx.textAlign = "center";
         actx.textBaseline = "middle";
-        const colors = ["#E7E1D6", "#E8A04A"];
+        const colors = [c("glyph.paper"), c("glyph.amber")];
         for (let colorIndex = 0; colorIndex < colors.length; colorIndex += 1) {
             actx.fillStyle = colors[colorIndex];
             for (let sizeIndex = 0; sizeIndex < GLYPH_SIZE_COUNT; sizeIndex += 1) {
@@ -141,10 +142,10 @@ export function startIntro(reducedMotion: boolean): void {
         const height = Math.max(pin.clientHeight || window.innerHeight || 800, 320);
         const marginX = 170 / width;
         const marginY = 170 / height;
-        const count = phone ? 1200 : 3000;
+        const count = phone ? n("glyph.countPhone") : n("glyph.count");
         glyphs = [];
         for (let i = 0; i < count; i += 1) {
-            const size = 8 + next() * 3;
+            const size = n("glyph.sizeMin") + next() * n("glyph.sizeSpan");
             glyphs.push({
                 nx: -marginX + next() * (1 + marginX * 2),
                 ny: -marginY + next() * (1 + marginY * 2),
@@ -179,13 +180,15 @@ export function startIntro(reducedMotion: boolean): void {
     };
 
     let stagedHeight = 0;
+    let stagedScroll = 0;
 
     const stageSize = () => {
         const height = Math.max(320, window.innerHeight || pin.clientHeight || 800);
         const width = Math.max(280, Math.min(pin.clientWidth || window.innerWidth || 800, window.innerWidth || 800));
         const nextScroll = scrollHeight(height, reducedMotion);
-        if (height !== stagedHeight) {
+        if (height !== stagedHeight || nextScroll !== stagedScroll) {
             stagedHeight = height;
+            stagedScroll = nextScroll;
             pin.style.height = height + "px";
             scrollScene.style.height = nextScroll + "px";
             if (window.ScrollTrigger) {
@@ -208,12 +211,12 @@ export function startIntro(reducedMotion: boolean): void {
             reducedMotion,
             header: headerOffset()
         });
-        const nextWidth = frame.diameter + "px";
+        const nextWidth = Math.max(1, Math.round(frame.diameter * n("lens.scale"))) + "px";
         if (rig.style.width !== nextWidth) {
             rig.style.width = nextWidth;
         }
         const nextLeft = frame.x + "px";
-        const nextTop = frame.y + "px";
+        const nextTop = (frame.y + n("lens.yNudge")) + "px";
         if (rig.style.left !== nextLeft) {
             rig.style.left = nextLeft;
         }
@@ -294,8 +297,8 @@ export function startIntro(reducedMotion: boolean): void {
                     }
                     const fall = Math.exp(-dist2 / sigma2);
                     const index = row * WATER_COLS + col;
-                    vx[index] += handX * fall * 0.85;
-                    vy[index] += handY * fall * 0.85;
+                    vx[index] += handX * fall * n("glyph.waterPush");
+                    vy[index] += handY * fall * n("glyph.waterPush");
                     if (mouse.on) {
                         const dist = Math.sqrt(dist2) || 1;
                         const shove = fall * (0.22 + moving * 0.03);
@@ -309,8 +312,8 @@ export function startIntro(reducedMotion: boolean): void {
         mouse.vy = 0;
 
         for (let index = 0; index < vx.length; index += 1) {
-            vx[index] *= 0.55;
-            vy[index] *= 0.55;
+            vx[index] *= n("glyph.waterDamp");
+            vy[index] *= n("glyph.waterDamp");
             ox[index] += vx[index];
             oy[index] += vy[index];
         }
@@ -352,17 +355,47 @@ export function startIntro(reducedMotion: boolean): void {
         const nameTop = nameRect.top - pinRect.top;
         const nameBottom = nameRect.bottom - pinRect.top;
         const nameMid = (nameTop + nameBottom) * 0.5;
+        const { width, height } = stageSize();
+        const cleared = nameClearance(width, nameRight, nameRect.width);
+        const yAt = (progress) => lensFrame({
+            width,
+            height,
+            nameRight: cleared,
+            progress,
+            reducedMotion,
+            header: headerOffset()
+        }).y + n("lens.yNudge");
+        const y0 = yAt(0);
+        const y1 = yAt(1);
+        const travel = y1 - y0;
+        const cross = Math.abs(travel) < 1 ? 0.5 : (nameMid - y0) / travel;
+        const yawDeg = reducedMotion
+            ? n("lens.yawStart")
+            : lensYaw(scrollProgress, cross, n("lens.yawStart"), n("lens.yawName"), n("lens.yawEnd"));
+        lensYawRad = yawDeg * Math.PI / 180;
         const light = {
-            x: lensX + radius * 2.45,
-            y: nameMid,
-            z: radius * 0.48
+            x: lensX + radius * n("lens.lampDist"),
+            y: lensY + radius * n("lens.lightY"),
+            z: radius * n("lens.lightZ")
         };
         const opticsMoved = opticsShifted([
             lensX, lensY, radius, light.x, light.y, light.z,
-            nameTop, nameBottom, nameRight, pin.clientWidth, pin.clientHeight
+            nameTop, nameBottom, nameRight, pin.clientWidth, pin.clientHeight,
+            tuneGeneration(), yawDeg
         ]);
         if (opticsMoved) {
-            const landings = landingsAt(lensX, lensY, radius, light, pin.clientHeight, nameRight);
+            const landings = focusLandings(
+                lensX,
+                lensY,
+                radius,
+                lensYawRad,
+                { x: light.x, y: light.y },
+                pin.clientHeight,
+                nameRight,
+                n("lens.curve"),
+                n("lens.edge"),
+                n("lens.ior")
+            );
             const nameHeight = Math.max(1, nameBottom - nameTop);
             if (landings.length) {
                 const sorted = landings.slice().sort((a, b) => a - b);
@@ -377,7 +410,7 @@ export function startIntro(reducedMotion: boolean): void {
                 const reachWidth = spread * 0.65 + 28;
                 const reach = Math.exp(-(dist * dist) / (2 * reachWidth * reachWidth));
                 const tight = 1 - Math.min(1, spread / (nameHeight * 1.35));
-                const strength = Math.min(1, 0.04 + reach * (0.28 + 0.72 * tight));
+                const strength = Math.min(1, n("name.beamFloor") + reach * (n("name.beamBase") + n("name.beamTight") * tight));
                 canopyName.style.setProperty("--caustic-y", causticY.toFixed(1) + "%");
                 canopyName.style.setProperty("--caustic-band", band.toFixed(1) + "%");
                 canopyName.style.setProperty("--beam", strength.toFixed(3));
@@ -392,7 +425,7 @@ export function startIntro(reducedMotion: boolean): void {
                     line.style.setProperty("--glow", glow.toFixed(3));
                 });
             } else {
-                canopyName.style.setProperty("--beam", "0.040");
+                canopyName.style.setProperty("--beam", n("name.beamFloor").toFixed(3));
                 canopyName.querySelectorAll(".name-beam .name-line").forEach((line) => {
                     line.style.setProperty("--glow", "0");
                 });
@@ -408,7 +441,7 @@ export function startIntro(reducedMotion: boolean): void {
             }
             const localX = mouse.x - pinRect.left;
             const localY = mouse.y - pinRect.top;
-            const time = reducedMotion ? 0 : performance.now() * 0.001;
+            const time = reducedMotion ? 0 : performance.now() * 0.001 * n("glyph.speed");
             if (!reducedMotion) {
                 stepWater(width, height, localX, localY);
             }
@@ -424,24 +457,27 @@ export function startIntro(reducedMotion: boolean): void {
                 const homeY = item.ny * height;
                 let x = homeX;
                 let y = homeY;
-                const alpha = item.amber ? Math.min(1, item.alpha + 0.12) : item.alpha;
+                const alpha = (item.amber ? Math.min(1, item.alpha + 0.12) : item.alpha) * n("glyph.alpha");
 
                 if (reducedMotion) {
                     if (mouse.on) {
                         const dx = x - localX;
                         const dy = y - localY;
                         const distance = Math.hypot(dx, dy) || 0.001;
-                        if (distance < 168) {
-                            const force = (168 - distance) / 168;
-                            x += (dx / distance) * force * 36;
-                            y += (dy / distance) * force * 36;
+                        const reach = n("glyph.pushRadius");
+                        if (distance < reach) {
+                            const force = (reach - distance) / reach;
+                            const push = n("glyph.push");
+                            x += (dx / distance) * force * push;
+                            y += (dy / distance) * force * push;
                         }
                     }
                 } else {
-                    const drift = swellAt(homeX, homeY, time);
+                    const drift = flag("glyph.pause") ? { x: 0, y: 0 } : swellAt(homeX, homeY, time);
                     const carried = sampleWater(homeX, homeY, width, height);
-                    x += drift.x + carried.x;
-                    y += drift.y + carried.y;
+                    const distanceScale = n("glyph.drift");
+                    x += drift.x * distanceScale + carried.x;
+                    y += drift.y * distanceScale + carried.y;
                 }
 
                 if (x < -24 || y < -24 || x > width + 24 || y > height + 24) {
@@ -465,7 +501,7 @@ export function startIntro(reducedMotion: boolean): void {
                         atlas.cell
                     );
                 } else {
-                    ctx.fillStyle = item.amber ? "#E8A04A" : "#E7E1D6";
+                    ctx.fillStyle = item.amber ? c("glyph.amber") : c("glyph.paper");
                     ctx.font = item.size.toFixed(1) + "px ui-monospace, SFMono-Regular, Menlo, monospace";
                     ctx.fillText(item.glyph, x, y);
                 }
@@ -545,12 +581,20 @@ export function startIntro(reducedMotion: boolean): void {
         const beamProgram = link(beamSource, "beam");
         const blurProgram = link(blurSource, "blur");
         const glassProgram = link(glassSource, "glass");
+        const lookNames = [
+            "uIor", "uSteer", "uSampleSpread", "uFocusDepth", "uSigmaK", "uSpine", "uExitSoft",
+            "uDenseKnee", "uBeamAlpha", "uBendNear", "uBendFar", "uGlyphGain", "uFresnelPow",
+            "uSpecPow", "uSpecGain", "uSpecSoft", "uSpecSoftGain", "uRimScale", "uGlassSpine",
+            "uGlassCap", "uBeamCool", "uBeamWarm", "uYaw", "uEdge", "uCurve"
+        ];
         const beamLoc = locations(beamProgram, [
-            "uBuffer", "uCssScale", "uViewHeight", "uLens", "uRadius", "uLight", "uNameSpan", "uNameRight", "uGain"
+            "uBuffer", "uCssScale", "uViewHeight", "uLens", "uRadius", "uLight", "uNameSpan", "uNameRight", "uGain",
+            ...lookNames
         ]);
-        const blurLoc = locations(blurProgram, ["uTex", "uDirection"]);
+        const blurLoc = locations(blurProgram, ["uTex", "uDirection", "uBlur"]);
         const glassLoc = locations(glassProgram, [
-            "uBuffer", "uCssScale", "uViewHeight", "uLens", "uRadius", "uLight", "uBeam", "uGlyphs"
+            "uBuffer", "uCssScale", "uViewHeight", "uLens", "uRadius", "uLight", "uBeam", "uGlyphs",
+            ...lookNames
         ]);
         let compositeProgram = null;
         let compositeLoc = null;
@@ -635,6 +679,47 @@ export function startIntro(reducedMotion: boolean): void {
             return { bw, bh, hw, hh, rebuilt: true };
         };
 
+        const setLook = (loc: Record<string, WebGLUniformLocation | null>) => {
+            const floats = {
+                uIor: n("lens.ior"),
+                uSteer: n("lens.steer"),
+                uSampleSpread: n("lens.spread"),
+                uFocusDepth: n("lens.focus"),
+                uSigmaK: n("lens.sigma"),
+                uSpine: n("lens.spine"),
+                uExitSoft: n("lens.exitSoft"),
+                uDenseKnee: n("lens.knee"),
+                uBeamAlpha: n("lens.beamAlpha"),
+                uBendNear: n("lens.bendNear"),
+                uBendFar: n("lens.bendFar"),
+                uGlyphGain: n("lens.glyphThrough"),
+                uFresnelPow: n("lens.fresnel"),
+                uSpecPow: n("lens.specPower"),
+                uSpecGain: n("lens.specGain"),
+                uSpecSoft: n("lens.specSoft"),
+                uSpecSoftGain: n("lens.specSoftGain"),
+                uRimScale: n("lens.rim"),
+                uGlassSpine: n("lens.glassSpine"),
+                uGlassCap: n("lens.glassCap"),
+                uYaw: lensYawRad,
+                uEdge: n("lens.edge"),
+                uCurve: n("lens.curve")
+            };
+            Object.keys(floats).forEach((name) => {
+                if (loc[name]) {
+                    gl.uniform1f(loc[name], floats[name]);
+                }
+            });
+            const cool = tuneVec3("lens.beamCool");
+            const warm = tuneVec3("lens.beamWarm");
+            if (loc.uBeamCool) {
+                gl.uniform3f(loc.uBeamCool, cool[0], cool[1], cool[2]);
+            }
+            if (loc.uBeamWarm) {
+                gl.uniform3f(loc.uBeamWarm, warm[0], warm[1], warm[2]);
+            }
+        };
+
         const setOptics = (loc: Record<string, WebGLUniformLocation | null>, scene: LensScene, bufferW: number, bufferH: number, scaleX: number, scaleY: number) => {
             gl.uniform2f(loc.uBuffer, bufferW, bufferH);
             gl.uniform2f(loc.uCssScale, scaleX, scaleY);
@@ -642,6 +727,7 @@ export function startIntro(reducedMotion: boolean): void {
             gl.uniform2f(loc.uLens, scene.lensX, scene.lensY);
             gl.uniform1f(loc.uRadius, scene.radius);
             gl.uniform3f(loc.uLight, scene.light.x, scene.light.y, scene.light.z);
+            setLook(loc);
         };
 
         const fullQuad = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
@@ -707,8 +793,9 @@ export function startIntro(reducedMotion: boolean): void {
                 const band = Math.abs(scene.lensY - nameMid) + scene.radius * 3.2;
                 const litY0 = Math.min(scene.lensY, nameMid) - band;
                 const litY1 = Math.max(scene.lensY, nameMid) + band;
-                const spreadX = 14 * (pin.clientWidth / size.hw);
-                const spreadY = 14 * (pin.clientHeight / size.hh);
+                const spreadPx = n("lens.blurSpread");
+                const spreadX = spreadPx * (pin.clientWidth / size.hw);
+                const spreadY = spreadPx * (pin.clientHeight / size.hh);
                 const refreshBeam = opticsMoved !== false || size.rebuilt || !beamValid;
 
                 if (refreshBeam) {
@@ -719,7 +806,7 @@ export function startIntro(reducedMotion: boolean): void {
                     setOptics(beamLoc, scene, size.hw, size.hh, pin.clientWidth / size.hw, pin.clientHeight / size.hh);
                     gl.uniform2f(beamLoc.uNameSpan, scene.nameTop, scene.nameBottom);
                     gl.uniform1f(beamLoc.uNameRight, scene.nameRight);
-                    gl.uniform1f(beamLoc.uGain, beamGain);
+                    gl.uniform1f(beamLoc.uGain, n("lens.gain"));
                     drawCssRect(-2, litY0 - 2, pin.clientWidth + 2, litY1 + 2);
 
                     gl.bindFramebuffer(gl.FRAMEBUFFER, blurTarget.fb);
@@ -729,6 +816,7 @@ export function startIntro(reducedMotion: boolean): void {
                     gl.uniform1i(blurLoc.uTex, 0);
                     gl.activeTexture(gl.TEXTURE0);
                     gl.bindTexture(gl.TEXTURE_2D, beamTarget.tex);
+                    gl.uniform1f(blurLoc.uBlur, n("lens.blur"));
                     gl.uniform2f(blurLoc.uDirection, 1 / size.hw, 0);
                     drawQuad();
 
@@ -912,6 +1000,29 @@ export function startIntro(reducedMotion: boolean): void {
             }
         });
     }
+
+    let glyphKey = "";
+    onTune(() => {
+        const nextKey = [
+            n("glyph.count"),
+            n("glyph.countPhone"),
+            n("glyph.sizeMin"),
+            n("glyph.sizeSpan"),
+            c("glyph.paper"),
+            c("glyph.amber")
+        ].join("|");
+        if (nextKey !== glyphKey) {
+            glyphKey = nextKey;
+            glyphAtlas = null;
+            buildGlyphs();
+        }
+        lastOptics = null;
+        stagedHeight = 0;
+        if (window.ScrollTrigger) {
+            window.ScrollTrigger.refresh();
+        }
+        schedule();
+    });
 
     buildGlyphs();
     fitCanvas();

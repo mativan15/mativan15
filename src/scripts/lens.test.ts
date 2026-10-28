@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { transmit } from "./optics";
-import { lensFrame, nameClearance, preferredDiameter, scrollHeight } from "./stage";
+import { lampSideways, lensFrame, lensYaw, nameClearance, preferredDiameter, scrollHeight } from "./stage";
 
 describe("lens placement", () => {
     it("keeps a wide lens on the right when the name leaves room", () => {
@@ -53,6 +53,33 @@ describe("lens placement", () => {
         expect(scrollHeight(800, false)).toBe(1760);
         expect(scrollHeight(800, true)).toBe(800);
         expect(scrollHeight(777, false)).toBe(1709);
+    });
+});
+
+describe("lamp sideways along the scroll", () => {
+    it("starts negative, hits 2.45 at the name, then keeps the same direction", () => {
+        const start = -1;
+        const atName = 2.45;
+        const cross = 0.4;
+        expect(lampSideways(0, cross, start, atName, 1)).toBe(start);
+        expect(lampSideways(cross, cross, start, atName, 1)).toBeCloseTo(atName);
+        const slope = (atName - start) / cross;
+        expect(lampSideways(0.2, cross, start, atName, 1)).toBeCloseTo(start + slope * 0.2);
+        expect(lampSideways(0.7, cross, start, atName, 1)).toBeCloseTo(start + slope * 0.7);
+        expect(lampSideways(0.7, cross, start, atName, 1)).toBeGreaterThan(atName);
+        expect(lampSideways(0.7, cross, start, atName, 0)).toBeCloseTo(atName);
+    });
+});
+
+describe("lens turn along the scroll", () => {
+    it("starts facing you, shows the edge at the name, and faces you again at the end", () => {
+        expect(lensYaw(0, 0.7, 0, 90, 180)).toBe(0);
+        expect(lensYaw(0.7, 0.7, 0, 90, 180)).toBeCloseTo(90);
+        expect(lensYaw(1, 0.7, 0, 90, 180)).toBeCloseTo(180);
+        expect(lensYaw(0.35, 0.7, 0, 90, 180)).toBeGreaterThan(0);
+        expect(lensYaw(0.35, 0.7, 0, 90, 180)).toBeLessThan(90);
+        expect(lensYaw(0.85, 0.7, 0, 90, 180)).toBeGreaterThan(90);
+        expect(lensYaw(0.85, 0.7, 0, 90, 180)).toBeLessThan(180);
     });
 });
 

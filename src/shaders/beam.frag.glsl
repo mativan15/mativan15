@@ -7,123 +7,80 @@ uniform float uViewHeight;
 uniform vec2 uLens;
 uniform float uRadius;
 uniform vec3 uLight;
-uniform vec2 uNameSpan;
-uniform float uNameRight;
+uniform float uIor;
+uniform float uYaw;
+uniform float uEdge;
+uniform float uCurve;
 uniform float uGain;
-/*__OPTICS__*/
+uniform float uSigmaK;
+uniform float uDenseKnee;
+uniform float uBeamAlpha;
+uniform vec3 uBeamCool;
+uniform vec3 uBeamWarm;
+/*__LENS__*/
+float segDist(vec2 p, vec2 a, vec2 b) {
+    vec2 ab = b - a;
+    float d2 = dot(ab, ab);
+    float t = d2 < 1.0e-4 ? 0.0 : clamp(dot(p - a, ab) / d2, 0.0, 1.0);
+    return length(p - (a + ab * t));
+}
+vec2 toScreen(vec3 world) {
+    return vec2(world.x, uViewHeight - world.y);
+}
 void main() {
     vec2 frag = vec2(gl_FragCoord.x, uBuffer.y - gl_FragCoord.y) * uCssScale;
-    vec2 rel = frag - uLens;
-    float nameMid = (uNameSpan.x + uNameSpan.y) * 0.5;
-    float band = abs(uLens.y - nameMid) + uRadius * 3.2;
-    if (frag.y < min(uLens.y, nameMid) - band || frag.y > max(uLens.y, nameMid) + band) {
+    if (abs(frag.y - uLens.y) > uRadius * 3.4) {
         fragColor = vec4(0.0);
         return;
     }
-
     vec3 center = vec3(uLens.x, uViewHeight - uLens.y, 0.0);
-    vec3 light = vec3(uLight.x, uViewHeight - uLight.y, uLight.z);
-    vec3 axis = normalize(center - light);
+    vec3 lamp = vec3(uLight.x, uViewHeight - uLight.y, uLight.z);
+    vec3 toward = center - lamp;
+    float span = max(length(toward), 1.0);
+    vec3 axis = toward / span;
     vec3 helper = abs(axis.y) < 0.85 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
     vec3 tx = normalize(cross(helper, axis));
     vec3 ty = cross(axis, tx);
-    vec2 axis2 = vec2(axis.x, -axis.y);
-    axis2 = length(axis2) > 1.0e-4 ? normalize(axis2) : vec2(-1.0, 0.0);
-    float side = dot(rel, axis2);
-    float dist = length(rel);
-    bool inside = dist < uRadius;
-    bool incomingLip = inside && dist > uRadius - 12.0 && side < 0.0;
-    if (inside && !incomingLip) {
-        fragColor = vec4(0.0);
-        return;
-    }
-    float sigma = max(12.0, uRadius * 0.055);
+    float sigma = max(7.0, uRadius * uSigmaK);
     float acc = 0.0;
-    vec3 target = center + axis * (uRadius * 0.72);
 
-    for (int i = 0; i < 48; i++) {
+    for (int i = 0; i < 40; i++) {
         float fi = float(i) + 0.5;
         float ang = fi * 2.39996323;
-        float rad = sqrt(fi / 48.0) * uRadius * 0.36;
-        vec3 sampleP = center + (tx * cos(ang) + ty * sin(ang)) * rad;
-        vec3 dir = normalize(target - sampleP);
-        vec3 origin = sampleP - dir * (uRadius * 5.0);
+        float rad = sqrt(fi / 40.0) * uRadius * 0.92;
+        vec3 aim = center + (tx * cos(ang) + ty * sin(ang)) * rad;
+        vec3 dir = normalize(aim - lamp);
+        vec3 origin = worldToLens(lamp - center, uYaw);
+        vec3 localDir = worldToLens(dir, uYaw);
         vec3 entry;
         vec3 exitPoint;
         vec3 outgoing;
-        if (!transmit(origin, dir, center, uRadius, entry, exitPoint, outgoing)) {
+        if (!traceLens(origin, localDir, uRadius, uCurve, uEdge, uIor, entry, exitPoint, outgoing)) {
             continue;
         }
-        if (outgoing.x > -0.02) {
-            continue;
-        }
-        float page = clamp(1.0 - abs(outgoing.z) * 1.2, 0.0, 1.0);
-        vec2 entry2 = vec2(entry.x, uViewHeight - entry.y);
-        vec2 exitScreen = vec2(exitPoint.x, uViewHeight - exitPoint.y);
-        vec2 chord = exitScreen - entry2;
-        vec2 relA = entry2 - uLens;
-        float a11 = dot(chord, chord);
-        float a12 = dot(chord, axis2);
-        float den = a11 - a12 * a12;
-        float tFocus = abs(den) < 1.0e-4 ? 0.5 : clamp((a12 * dot(axis2, relA) - dot(chord, relA)) / den, 0.0, 1.0);
-        vec2 waist = entry2 + chord * tFocus;
-        vec2 leave = exitScreen - waist;
-        float leaveLen = length(leave);
-        vec2 leaveDir = leaveLen > 1.0e-4 ? leave / leaveLen : axis2;
-        vec2 tight = normalize(mix(leaveDir, axis2, 0.60));
-        vec2 relW = waist - uLens;
-        float hitB = dot(relW, tight);
-        float hitC = dot(relW, relW) - uRadius * uRadius;
-        float hitD = hitB * hitB - hitC;
-        float hitT = leaveLen;
-        if (hitD > 0.0) {
-            hitT = max(-hitB + sqrt(hitD), 0.0);
-        }
-        vec2 exit2 = waist + tight * hitT;
-        vec2 fromCenter = entry2 - uLens;
-        if (dot(fromCenter, axis2) < 0.0) {
-            vec2 inDir = normalize(fromCenter);
-            vec2 deltaIn = frag - entry2;
-            float alongOut = dot(deltaIn, inDir);
-            if (alongOut > 1.0 && (!inside || incomingLip)) {
-                float perp = length(deltaIn - inDir * alongOut);
-                float outside = max(dist - uRadius, 0.0);
-                if (outside < 16.0 && perp < sigma * 3.2) {
-                    float hug = 1.0 - smoothstep(0.0, 16.0, outside);
-                    perp *= mix(1.0, 0.82, hug);
-                }
-                float reach = 1.0 / (1.0 + alongOut / (uRadius * 26.0));
-                float core = exp(-0.5 * (perp / sigma) * (perp / sigma));
-                float body = exp(-0.5 * (perp / (sigma * 2.15)) * (perp / (sigma * 2.15)));
-                acc += (core + body * 0.16) * page * reach;
-            }
-        }
-
-        vec2 delta = frag - exit2;
-        float along = dot(delta, tight);
-        if (!inside && along > 1.0) {
-            float perp = length(delta - tight * along);
-            float reach = 1.0 / (1.0 + along / (uRadius * 26.0));
-            float baseSigma = max(10.0, uRadius * 0.046);
-            float exitSigma = max(baseSigma, (along + uRadius * 0.55) * 0.042);
-            float soft = exp(-0.5 * (perp / exitSigma) * (perp / exitSigma));
-            acc += soft * 0.22 * page * reach;
-        }
-    }
-
-    vec2 fromLens = frag - uLens;
-    float alongAxis = dot(fromLens, axis2);
-    if (!inside && alongAxis > uRadius * 0.2) {
-        float perpAxis = length(fromLens - axis2 * alongAxis);
-        float fromPinch = max(alongAxis - uRadius * 0.38, 0.0);
-        float coreSigma = max(8.0, uRadius * 0.036) + fromPinch * 0.015;
-        float spine = exp(-0.5 * (perpAxis / coreSigma) * (perpAxis / coreSigma));
-        float spineReach = 1.0 / (1.0 + max(alongAxis - uRadius, 0.0) / (uRadius * 34.0));
-        acc += spine * 14.0 * spineReach;
+        vec3 entryW = center + lensToWorld(entry, uYaw);
+        vec3 exitW = center + lensToWorld(exitPoint, uYaw);
+        vec3 outW = normalize(lensToWorld(outgoing, uYaw));
+        vec3 dirW = normalize(entryW - lamp);
+        float approach = min(length(entryW - lamp), uRadius * 3.1);
+        vec3 incoming = entryW - dirW * approach;
+        vec2 a = toScreen(incoming);
+        vec2 b = toScreen(entryW);
+        vec2 c = toScreen(exitW);
+        vec2 d = toScreen(exitW + outW * (uRadius * 7.5));
+        float nearIn = segDist(frag, a, b);
+        float nearGlass = segDist(frag, b, c);
+        float nearOut = segDist(frag, c, d);
+        float coreIn = exp(-0.5 * (nearIn / sigma) * (nearIn / sigma));
+        float bodyIn = exp(-0.5 * (nearIn / (sigma * 2.15)) * (nearIn / (sigma * 2.15)));
+        float coreGlass = exp(-0.5 * (nearGlass / (sigma * 0.72)) * (nearGlass / (sigma * 0.72)));
+        float coreOut = exp(-0.5 * (nearOut / sigma) * (nearOut / sigma));
+        float bodyOut = exp(-0.5 * (nearOut / (sigma * 2.15)) * (nearOut / (sigma * 2.15)));
+        acc += (coreIn + bodyIn * 0.16) * 0.55 + coreGlass * 0.35 + coreOut + bodyOut * 0.16;
     }
 
     acc *= uGain / 2.7;
-    float dense = acc / (acc + 6.4);
-    vec3 rgb = mix(vec3(0.93, 0.41, 0.06), vec3(0.98, 0.91, 0.78), dense);
-    fragColor = vec4(rgb * dense, dense) * 0.9;
+    float dense = acc / (acc + uDenseKnee);
+    vec3 rgb = mix(uBeamCool, uBeamWarm, dense);
+    fragColor = vec4(rgb * dense, dense) * uBeamAlpha;
 }

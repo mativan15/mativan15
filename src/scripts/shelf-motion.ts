@@ -1,3 +1,5 @@
+import { n } from "./visual-tune";
+
 export interface ShelfMetrics {
     w: number;
     h: number;
@@ -50,26 +52,26 @@ export function circularOffset(index: number, from: number, count: number): numb
 }
 
 export function shelfMetrics(width: number): ShelfMetrics {
-    const w = clamp(width * 0.16, 108, 176);
+    const w = clamp(width * n("shelf.widthRatio"), n("shelf.widthMin"), n("shelf.widthMax"));
     return {
         w,
-        h: w * 1.5,
-        d: Math.max(22, w * 0.2),
-        step: w * 0.56,
-        gap: w * 0.62
+        h: w * n("shelf.heightRatio"),
+        d: Math.max(n("shelf.depthMin"), w * n("shelf.depthRatio")),
+        step: w * n("shelf.step"),
+        gap: w * n("shelf.gap")
     };
 }
 
 export function shelfPose(distance: number, size: ShelfMetrics): ShelfPose {
     const abs = Math.abs(distance);
     const sign = distance < 0 ? -1 : distance > 0 ? 1 : 0;
-    const prominence = Math.exp(-abs * abs * 1.7);
+    const prominence = Math.exp(-abs * abs * n("shelf.prominence"));
     return {
         x: distance * size.step + sign * size.gap * Math.min(abs, 1),
-        y: -prominence * size.w * 0.08,
-        z: -abs * size.w * 0.22 + prominence * size.w * 0.55,
-        rot: distance === 0 ? 0 : clamp(-distance * 31, -58, 58),
-        scale: 0.94 + prominence * 0.16
+        y: -prominence * size.w * n("shelf.lift"),
+        z: -abs * size.w * n("shelf.zBack") + prominence * size.w * n("shelf.zFront"),
+        rot: distance === 0 ? 0 : clamp(-distance * n("shelf.rot"), -n("shelf.rotMax"), n("shelf.rotMax")),
+        scale: n("shelf.scaleBase") + prominence * n("shelf.scalePop")
     };
 }
 
@@ -140,12 +142,22 @@ const fromLeftOf = (x: number, stageWidth: number): number => 50 - (Math.abs(x) 
  * When that copy is already off the screen, only the light side dim remains.
  */
 export function shelfShade(count: number, stageWidth: number, size: ShelfMetrics): ShelfShade {
+    const openShade = (): ShelfShade => ({
+        edge: n("shade.openEdge"),
+        a: n("shade.openA"),
+        aAlpha: n("shade.openAAlpha"),
+        b: n("shade.openB"),
+        bAlpha: n("shade.openBAlpha"),
+        c: n("shade.openC"),
+        cAlpha: n("shade.openCAlpha"),
+        d: n("shade.openD")
+    });
     if (count <= 1 || stageWidth <= 0) {
-        return { ...SHELF_SHADE_OPEN };
+        return openShade();
     }
     const repeatX = bookCenterX(count / 2, size);
     if (repeatX >= stageWidth / 2) {
-        return { ...SHELF_SHADE_OPEN };
+        return openShade();
     }
     const uniqueDistance = Math.floor((count - 1) / 2);
     const uniqueX = bookCenterX(uniqueDistance, size);
@@ -155,14 +167,14 @@ export function shelfShade(count: number, stageWidth: number, size: ShelfMetrics
     const repeatStop = clamp(repeatPercent, 4, 42);
     const uniqueStop = clamp(Math.max(uniquePercent, repeatStop + 3), repeatStop + 3, 46);
     const tight: ShelfShade = {
-        edge: 0.92,
-        a: clamp(repeatStop - 5, 2, repeatStop - 1.5),
-        aAlpha: 0.94,
+        edge: n("shade.tightEdge"),
+        a: clamp(repeatStop - n("shade.aLead"), 2, repeatStop - 1.5),
+        aAlpha: n("shade.aAlpha"),
         b: repeatStop,
-        bAlpha: 0.84,
+        bAlpha: n("shade.bAlpha"),
         c: uniqueStop,
-        cAlpha: 0.2,
-        d: clamp(Math.max(spotlight, uniqueStop + 6), uniqueStop + 4, 48)
+        cAlpha: n("shade.cAlpha"),
+        d: clamp(Math.max(spotlight, uniqueStop + n("shade.dExtra")), uniqueStop + 4, 48)
     };
     return tight;
 }
@@ -177,7 +189,7 @@ export function loopRepeats(count: number): number {
     if (count <= 1) {
         return 1;
     }
-    return Math.ceil(SHELF_MIN_LOOP / count);
+    return Math.ceil(n("shelf.minLoop") / count);
 }
 
 /**
@@ -190,10 +202,10 @@ export function shelfCruise(pointer: number | null, reducedMotion = false): numb
     if (reducedMotion) {
         return 0;
     }
-    if (pointer === null || Math.abs(pointer) < 0.16) {
-        return SHELF_IDLE_RATE;
+    if (pointer === null || Math.abs(pointer) < n("shelf.deadZone")) {
+        return n("shelf.idle");
     }
-    return Math.sign(pointer) * SHELF_CRUISE_RATE;
+    return Math.sign(pointer) * n("shelf.cruise");
 }
 
 export function visibleBooks<T extends { tag: string }>(books: readonly T[], tag: string): T[] {
