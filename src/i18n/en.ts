@@ -23,7 +23,7 @@ const en = {
     "work.intro": "One book for each repository. The note says what the program actually does.",
     "shelf.filters": "Filter projects",
     "shelf.stage": "Project shelf",
-    "shelf.hint": "It keeps turning. Rest the pointer on either side to turn that way. A click opens the book in front.",
+    "shelf.hint": "It keeps turning. Click a book to bring it to the center. Click the center book to open it.",
     "shelf.empty": "No project in this filter.",
     "shelf.filter.all": "All",
     "shelf.filter.networks": "Networks",

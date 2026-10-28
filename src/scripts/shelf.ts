@@ -20,6 +20,7 @@ import {
 } from "./shelf-motion";
 
 const TAU_MS = 170;
+const CLICK_GLIDE_MS = 75;
 
 function copyOf(book: ShelfBook, lang: ShelfLang): ShelfCopy {
     return book.copy[lang];
@@ -246,6 +247,8 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
     let velocity = 0;
     let pointerSide: number | null = null;
     let glide: number | null = null;
+    let glideMs = TAU_MS;
+    let releaseAt: { x: number; y: number } | null = null;
     let last = performance.now();
     let drag: { x: number; y: number; focus: number; moved: boolean; id: number; axis: "" | "x" | "y" } | null = null;
     let fittedWidth = 0;
@@ -342,44 +345,51 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         anchor.click();
     };
 
-    const bookUnder = (clientX: number, clientY: number, size: ShelfMetrics): number | null => {
+    const bookUnder = (clientX: number, clientY: number, size: ShelfMetrics): { turn: number; source: number } | null => {
         const bounds = stage.getBoundingClientRect();
         const y = (clientY - bounds.top) / Math.max(bounds.height, 1);
         if (y < 0.12 || y > 0.9) {
             return null;
         }
         const books = currentBooks();
-        let best = -1;
+        const count = books.length;
+        if (count === 0) {
+            return null;
+        }
+        const loop = count * loopRepeats(count);
+        let best: (typeof slots)[number] | null = null;
         let bestDistance = Infinity;
-        let currentNode: HTMLElement | undefined;
-        const current = wrapIndex(Math.round(focus), books.length);
+        let front: (typeof slots)[number] | null = null;
         slots.forEach((slot) => {
             if (slot.node.hidden) {
                 return;
+            }
+            if (slot.node.getAttribute("aria-current") === "true") {
+                front = slot;
             }
             const rect = slot.node.getBoundingClientRect();
             const distance = Math.abs(rect.left + rect.width / 2 - clientX);
             if (distance < bestDistance) {
                 bestDistance = distance;
-                best = slot.place;
-            }
-            if (slot.place === current && slot.node.getAttribute("aria-current") === "true") {
-                currentNode = slot.node;
+                best = slot;
             }
         });
-        if (best < 0) {
+        if (!best) {
             return null;
         }
-        if (!currentNode) {
-            return nearestTurn(best, focus, books.length);
+        if (front) {
+            const frontRect = front.node.getBoundingClientRect();
+            const frontDistance = Math.abs(frontRect.left + frontRect.width / 2 - clientX);
+            const slack = Math.max(18, size.w * 0.16);
+            if (best !== front && bestDistance > frontDistance - slack) {
+                best = front;
+            }
         }
-        const currentRect = currentNode.getBoundingClientRect();
-        const currentDistance = Math.abs(currentRect.left + currentRect.width / 2 - clientX);
-        const slack = Math.max(18, size.w * 0.16);
-        if (best !== current && bestDistance > currentDistance - slack) {
-            return nearestTurn(current, focus, books.length);
-        }
-        return nearestTurn(best, focus, books.length);
+        const loopIndex = best.place + best.copy * count;
+        return {
+            turn: count <= 1 ? focus : nearestTurn(loopIndex, focus, loop),
+            source: best.source
+        };
     };
 
     const frame = (now: number): void => {
@@ -405,13 +415,18 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         if (dragging) {
             velocity = 0;
         } else if (glide !== null) {
-            focus += (glide - focus) * (1 - Math.exp(-dt / TAU_MS));
-            if (Math.abs(glide - focus) < 0.004) {
+            if (reducedMotion) {
                 focus = glide;
                 glide = null;
+            } else {
+                focus += (glide - focus) * (1 - Math.exp(-dt / glideMs));
+                if (Math.abs(glide - focus) < 0.004) {
+                    focus = glide;
+                    glide = null;
+                }
             }
         } else if (!reducedMotion) {
-            const desired = shelfCruise(pointerSide, reducedMotion);
+            const desired = shelfCruise(releaseAt ? null : pointerSide, reducedMotion);
             velocity += (desired - velocity) * (1 - Math.exp(-dt / 120));
             focus += velocity * (dt / 1000);
         }
@@ -570,11 +585,19 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
             velocity = 0;
             return;
         }
+        if (releaseAt) {
+            const dx = event.clientX - releaseAt.x;
+            const dy = event.clientY - releaseAt.y;
+            if (dx * dx + dy * dy > 144) {
+                releaseAt = null;
+            }
+        }
         placePointer(event);
     });
 
     stage.addEventListener("pointerleave", () => {
         pointerSide = null;
+        releaseAt = null;
     });
 
     const endDrag = (event: PointerEvent): void => {
@@ -585,18 +608,16 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         stage.classList.remove("is-drag");
         if (!horizontal && !drag.moved) {
             // Rotated covers do not receive the hit, so the choice uses the pointer.
-            // Only the book already in front opens. A side click does not stop the spin.
+            // A side book rushes to the center. The book already there opens.
             const size = shelfMetrics(stage.getBoundingClientRect().width);
-            const place = bookUnder(event.clientX, event.clientY, size);
-            const books = currentBooks();
-            const active = books.length === 0 ? -1 : wrapIndex(Math.round(focus), books.length);
-            const activeTurn = active < 0 ? null : nearestTurn(active, focus, books.length);
-            if (place !== null && place === activeTurn && active >= 0) {
-                const book = books[active];
-                const index = book ? SHELF_BOOKS.indexOf(book) : -1;
-                if (index >= 0) {
-                    openBook(index);
-                }
+            const hit = bookUnder(event.clientX, event.clientY, size);
+            if (hit && Math.abs(hit.turn - focus) < 0.45) {
+                openBook(hit.source);
+            } else if (hit) {
+                glide = hit.turn;
+                glideMs = CLICK_GLIDE_MS;
+                velocity = 0;
+                releaseAt = { x: event.clientX, y: event.clientY };
             }
         }
         drag = null;
@@ -616,6 +637,7 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         }
         focus += event.deltaX / 420;
         glide = null;
+        releaseAt = null;
     }, { passive: false });
 
     window.addEventListener("keydown", (event) => {
@@ -637,7 +659,9 @@ export function startShelf(reducedMotion: boolean, i18n: SiteI18n): void {
         event.preventDefault();
         const step = event.key === "ArrowRight" ? 1 : -1;
         glide = Math.round(focus) + step;
+        glideMs = TAU_MS;
         velocity = 0;
+        releaseAt = null;
     });
 
     document.addEventListener("site-lang", () => {

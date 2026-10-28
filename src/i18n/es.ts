@@ -23,7 +23,7 @@ const es = {
     "work.intro": "Un libro por repositorio. La nota dice lo que el programa hace de verdad.",
     "shelf.filters": "Filtrar proyectos",
     "shelf.stage": "Estantería de proyectos",
-    "shelf.hint": "Sigue girando. Deja el puntero en un lado para girar hacia allí. Un clic abre el libro de delante.",
+    "shelf.hint": "Sigue girando. Un clic trae el libro al centro. Otro clic, en ese libro, abre el repositorio.",
     "shelf.empty": "Ningún proyecto en este filtro.",
     "shelf.filter.all": "Todos",
     "shelf.filter.networks": "Redes",
