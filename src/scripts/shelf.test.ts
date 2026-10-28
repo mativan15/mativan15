@@ -12,6 +12,7 @@ import {
     SHELF_SHADE_OPEN,
     loopRepeats,
     shelfCruise,
+    shadeAlpha,
     shelfShade,
     shelfMetrics,
     shelfPose,
@@ -174,20 +175,31 @@ describe("shelf motion", () => {
         expect(Math.abs(edge.x)).toBeGreaterThan(size.w * 4);
     });
 
-    it("dims a full row lightly and keeps the tight spotlight when copies would show", () => {
-        const wide = shelfMetrics(1800);
-        expect(shelfShade(42, 1800, wide)).toEqual(SHELF_SHADE_OPEN);
-        expect(shelfShade(4, 390, shelfMetrics(390))).toEqual(SHELF_SHADE_OPEN);
-
-        const four = shelfShade(4, 1800, wide);
-        const two = shelfShade(2, 1800, wide);
-        expect(four.edge).toBe(1);
-        expect(four.d).toBe(46);
-        expect(four.a).toBeGreaterThan(26);
-        expect(two.edge).toBe(1);
-        expect(two.a).toBeGreaterThan(four.a);
-        expect(two.a).toBeLessThan(two.d);
-        expect(SHELF_SHADE_OPEN.edge).toBeLessThan(0.5);
+    it("keeps unique books readable and hides only the repeated copy", () => {
+        const widths = [390, 800, 1200, 1680];
+        const counts = [2, 3, 4, 6, 8, 10, 12, 42];
+        widths.forEach((width) => {
+            const size = shelfMetrics(width);
+            counts.forEach((count) => {
+                const shade = shelfShade(count, width, size);
+                const alphaAt = (distance: number): number => {
+                    const x = Math.abs(shelfPose(distance, size).x);
+                    return shadeAlpha(shade, 50 - (x / width) * 100);
+                };
+                const repeatX = Math.abs(shelfPose(count / 2, size).x);
+                if (repeatX >= width / 2) {
+                    expect(shade).toEqual(SHELF_SHADE_OPEN);
+                    expect(shade.edge).toBeGreaterThan(0.1);
+                    expect(shade.edge).toBeLessThan(0.5);
+                    return;
+                }
+                const furthestUnique = Math.floor((count - 1) / 2);
+                expect(alphaAt(furthestUnique)).toBeLessThan(0.4);
+                expect(alphaAt(count / 2)).toBeGreaterThan(0.8);
+            });
+        });
+        const wide = shelfMetrics(1600);
+        expect(shelfShade(6, 1600, wide).a).toBeGreaterThan(shelfShade(6, 800, shelfMetrics(800)).a);
     });
 
     it("opens the shadow as books are added and closes it as they are removed", () => {

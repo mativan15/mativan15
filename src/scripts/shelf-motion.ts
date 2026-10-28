@@ -102,49 +102,69 @@ export const SHELF_SHADE_OPEN: ShelfShade = {
     d: 24
 };
 
+/** How solid the page color is at a point, 0 at the left edge and 100 at the right. */
+export function shadeAlpha(shade: ShelfShade, fromLeftPercent: number): number {
+    const point = Math.min(fromLeftPercent, 100 - fromLeftPercent);
+    const stops: [number, number][] = [
+        [0, shade.edge],
+        [shade.a, shade.aAlpha],
+        [shade.b, shade.bAlpha],
+        [shade.c, shade.cAlpha],
+        [shade.d, 0],
+        [50, 0]
+    ].sort((left, right) => left[0] - right[0]);
+    if (point <= stops[0][0]) {
+        return stops[0][1];
+    }
+    for (let index = 1; index < stops.length; index += 1) {
+        const [start, startAlpha] = stops[index - 1];
+        const [end, endAlpha] = stops[index];
+        if (point <= end) {
+            const span = end - start;
+            const mix = span === 0 ? 0 : (point - start) / span;
+            return startAlpha + (endAlpha - startAlpha) * mix;
+        }
+    }
+    return 0;
+}
+
+const bookCenterX = (distance: number, size: ShelfMetrics): number => Math.abs(shelfPose(distance, size).x);
+
+const fromLeftOf = (x: number, stageWidth: number): number => 50 - (Math.abs(x) / stageWidth) * 100;
+
 /**
  * Shadow across the stage.
  * Stops are percentages from the left edge. Alphas are how solid the page color is.
- * A long row only dims the edges. A short row keeps the tight black spotlight,
- * pulled in until the repeated copy sits under it.
+ * Books closer than half a cycle are unique, so they only get a light dim.
+ * The copy at half a cycle is the same title on both sides, so that one goes dark.
+ * When that copy is already off the screen, only the light side dim remains.
  */
 export function shelfShade(count: number, stageWidth: number, size: ShelfMetrics): ShelfShade {
     if (count <= 1 || stageWidth <= 0) {
         return { ...SHELF_SHADE_OPEN };
     }
-    const duplicateInner = count * size.step + size.gap - size.w * 0.7;
-    const fromLeft = 50 - (duplicateInner / stageWidth) * 100;
-    if (fromLeft <= 12) {
+    const repeatX = bookCenterX(count / 2, size);
+    if (repeatX >= stageWidth / 2) {
         return { ...SHELF_SHADE_OPEN };
     }
-    const a = clamp(fromLeft, 12, 42);
-    const d = 46;
-    const span = d - a;
+    const uniqueDistance = Math.floor((count - 1) / 2);
+    const uniqueX = bookCenterX(uniqueDistance, size);
+    const repeatPercent = fromLeftOf(repeatX, stageWidth);
+    const uniquePercent = uniqueDistance === 0 ? 44 : fromLeftOf(uniqueX, stageWidth);
+    const spotlight = fromLeftOf(bookCenterX(0.4, size), stageWidth);
+    const repeatStop = clamp(repeatPercent, 4, 42);
+    const uniqueStop = clamp(Math.max(uniquePercent, repeatStop + 3), repeatStop + 3, 46);
     const tight: ShelfShade = {
-        edge: 1,
-        a,
-        aAlpha: 0.98,
-        b: a + (8 / 34) * span,
-        bAlpha: 0.92,
-        c: a + (20 / 34) * span,
-        cAlpha: 0.62,
-        d
+        edge: 0.92,
+        a: clamp(repeatStop - 5, 2, repeatStop - 1.5),
+        aAlpha: 0.94,
+        b: repeatStop,
+        bAlpha: 0.84,
+        c: uniqueStop,
+        cAlpha: 0.2,
+        d: clamp(Math.max(spotlight, uniqueStop + 6), uniqueStop + 4, 48)
     };
-    if (fromLeft >= 26) {
-        return tight;
-    }
-    const blend = (fromLeft - 12) / (26 - 12);
-    const mix = (open: number, closed: number): number => open + (closed - open) * blend;
-    return {
-        edge: mix(SHELF_SHADE_OPEN.edge, tight.edge),
-        a: mix(SHELF_SHADE_OPEN.a, tight.a),
-        aAlpha: mix(SHELF_SHADE_OPEN.aAlpha, tight.aAlpha),
-        b: mix(SHELF_SHADE_OPEN.b, tight.b),
-        bAlpha: mix(SHELF_SHADE_OPEN.bAlpha, tight.bAlpha),
-        c: mix(SHELF_SHADE_OPEN.c, tight.c),
-        cAlpha: mix(SHELF_SHADE_OPEN.cAlpha, tight.cAlpha),
-        d: mix(SHELF_SHADE_OPEN.d, tight.d)
-    };
+    return tight;
 }
 
 /**
