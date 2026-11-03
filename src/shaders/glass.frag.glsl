@@ -40,18 +40,22 @@ void main() {
     vec3 outgoing;
     bool hit = traceLens(camLocal, viewLocal, uRadius, uCurve, uEdge, uIor, entry, exitPoint, outgoing);
     if (!hit) {
-        float ndMiss = length(rel) / aperture;
-        float face = abs(cos(uYaw));
-        float edge = smoothstep(0.968, 0.99, ndMiss) * (1.0 - smoothstep(1.0, 1.008, ndMiss));
-        vec2 o = length(rel) > 0.5 ? normalize(rel) : vec2(1.0, 0.0);
-        vec3 rimN = normalize(vec3(o.x, -o.y, 0.62));
+        float yawC = cos(uYaw);
+        float yawS = sin(uYaw);
+        float rx = max(aperture * sqrt(yawC * yawC + 0.115 * yawS * yawS), 1.0);
+        float ellipseNd = length(vec2(rel.x / rx, rel.y / aperture));
+        float edge = smoothstep(0.968, 0.99, ellipseNd) * (1.0 - smoothstep(1.0, 1.01, ellipseNd));
+        vec2 local = vec2(rel.x / max(abs(yawC), 0.2), -rel.y);
+        if (yawC < 0.0) local.x = -local.x;
+        vec2 outward = dot(local, local) > 1.0e-4 ? normalize(local) : vec2(1.0, 0.0);
+        vec3 rimN = normalize(lensToWorld(normalize(vec3(outward, 0.62)), uYaw));
         vec3 lightW = vec3(uLight.x, uViewHeight - uLight.y, uLight.z);
         vec3 lightDir = normalize(lightW - vec3(frag.x, uViewHeight - frag.y, 0.0));
         vec3 viewW = vec3(0.0, 0.0, 1.0);
         vec3 halfV = normalize(lightDir + viewW);
         float specCatch = pow(clamp(dot(rimN, halfV), 0.0, 1.0), 12.0);
-        float catchAmt = specCatch * edge * face * 1.35 * uRimScale;
-        vec3 rimCol = vec3(0.99, 0.95, 0.86) * catchAmt;
+        float catchAmt = mix(0.32, 0.98, specCatch) * edge * uRimScale;
+        vec3 rimCol = vec3(0.97, 0.98, 0.99) * catchAmt;
         fragColor = vec4(rimCol + beam.rgb * (1.0 - catchAmt), catchAmt + beamA * (1.0 - catchAmt));
         return;
     }
@@ -114,7 +118,7 @@ void main() {
     float faceLight = pow(clamp(dot(nWorld, lightDir), 0.0, 1.0), 1.7);
     color += vec3(0.95, 0.86, 0.68) * faceLight * 0.07;
     color += beamRgb * beamA * 0.45;
-    color += vec3(0.99, 0.95, 0.86) * specCatch * atEdge * 1.35 * uRimScale;
+    color += vec3(0.97, 0.98, 0.99) * mix(0.32, 0.98, specCatch) * atEdge * uRimScale;
     color += vec3(1.0, 0.97, 0.92) * spec * uSpecGain;
     color = clamp(color, 0.0, uGlassCap);
     float grazing = abs(dot(normalize(nUse), normalize(viewLocal)));
